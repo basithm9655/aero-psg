@@ -1,0 +1,7 @@
+# Unwanted files (not needed for Vercel deployment)
+unwanted/
+prompt.md
+DEPLOY.md
+*.local
+.DS_Store
+Thumbs.db
