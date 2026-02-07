@@ -12,15 +12,15 @@ export const EVENTS_DATA = [
     // ========== LIVE EVENT (Shows in Hero with Countdown) ==========
     {
         id: 1,
-        title: "Aerospace    Workshop '26",
-        type: "TECHNICAL WORKSHOP",
-        status: "live",        // live, upcoming, or past
+        title: "Aero    Quest '26",
+        type: "TECHNICAL EVENT",
+        status: "upcoming",        // live, upcoming, or past
         isLive: true,          // ONLY ONE EVENT should have this true!
 
         // EVENT TIMING
-        date: "MAR 15, 2026",
+        date: "MAR 20, 2026",
         time: "10:00 AM - 4:00 PM",
-        eventDate: new Date('2026-04-15T10:00:00'), // For countdown calculation
+        eventDate: new Date('2026-04-20T10:00:00'), // For countdown calculation
 
         // VENUE DETAILS
         venue: "Main Auditorium",
