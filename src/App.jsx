@@ -848,101 +848,102 @@ function CertificateVault({ soundOn, playSfx }) {
         if (soundOn) playSfx('click');
 
         try {
-            // Import libraries dynamically
             const html2canvas = (await import('html2canvas')).default;
             const { jsPDF } = await import('jspdf');
 
-            const certificateElement = document.getElementById('print-certificate');
-            if (!certificateElement) {
+            const cert = document.getElementById('print-certificate');
+            if (!cert) {
                 alert('Certificate not found!');
                 return;
             }
 
-            console.log('Generating PDF...');
+            // SIMPLEST APPROACH: Show certificate visibly in overlay
+            cert.style.position = 'fixed';
+            cert.style.left = '50%';
+            cert.style.top = '50%';
+            cert.style.transform = 'translate(-50%, -50%) scale(0.5)'; // Scale down to fit screen
+            cert.style.opacity = '1';
+            cert.style.visibility = 'visible';
+            cert.style.zIndex = '999999';
+            cert.style.backgroundColor = 'white';
 
-            // Show certificate for capture
-            certificateElement.style.position = 'fixed';
-            certificateElement.style.left = '0';
-            certificateElement.style.top = '0';
-            certificateElement.style.opacity = '1';
-            certificateElement.style.zIndex = '9999';
-            certificateElement.style.visibility = 'visible';
+            // Add dark overlay behind
+            const overlay = document.createElement('div');
+            overlay.id = 'cert-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.9);
+                z-index: 999998;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            document.body.appendChild(overlay);
 
-            // CRITICAL: Wait for images to load
-            const images = certificateElement.querySelectorAll('img');
-            const imagePromises = Array.from(images).map(img => {
-                // Add CORS attribute
-                if (!img.crossOrigin) {
-                    img.crossOrigin = 'anonymous';
-                }
-
-                if (img.complete && img.naturalHeight > 0) {
-                    return Promise.resolve();
-                }
+            // Wait for images
+            const images = cert.querySelectorAll('img');
+            await Promise.all(Array.from(images).map(img => {
+                if (img.complete) return Promise.resolve();
                 return new Promise(resolve => {
                     img.onload = resolve;
                     img.onerror = resolve;
-                    setTimeout(resolve, 3000); // 3s timeout
+                    setTimeout(resolve, 2000);
                 });
-            });
+            }));
 
-            await Promise.all(imagePromises);
-            console.log('Images loaded');
+            // Small delay for rendering
+            await new Promise(r => setTimeout(r, 300));
 
-            // CRITICAL: Wait for browser to render
-            await new Promise(resolve => setTimeout(resolve, 500));
-            console.log('Starting capture...');
+            console.log('Capturing visible certificate...');
 
-            // Capture certificate as high-quality image
-            const canvas = await html2canvas(certificateElement, {
+            // Capture at full scale
+            cert.style.transform = 'translate(-50%, -50%) scale(1)'; // Full size for capture
+            await new Promise(r => setTimeout(r, 100));
+
+            const canvas = await html2canvas(cert, {
                 scale: 2,
                 useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#FFFDF5',
-                logging: true, // Debug mode
-                removeContainer: false
+                logging: false,
+                backgroundColor: '#FFFDF5'
             });
 
-            console.log('Capture complete, canvas size:', canvas.width, 'x', canvas.height);
+            console.log('Captured! Size:', canvas.width, 'x', canvas.height);
 
-            // Hide certificate again
-            certificateElement.style.position = 'absolute';
-            certificateElement.style.left = '-9999px';
-            certificateElement.style.opacity = '0';
-            certificateElement.style.visibility = 'hidden';
+            // Create PDF
+            const pdf = new jsPDF('landscape', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
 
-            // Create PDF (A4 landscape)
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
-            });
+            // Download
+            pdf.save(`${certificateData.name.replace(/\s+/g, '_')}_Certificate.pdf`);
 
-            // Get canvas dimensions
-            const imgWidth = 297; // A4 width in mm
-            const imgHeight = 210; // A4 height in mm
+            console.log('PDF downloaded!');
 
-            // Add image to PDF
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-
-            // Download PDF
-            const fileName = `${certificateData.name.replace(/\s+/g, '_')}_Certificate.pdf`;
-            pdf.save(fileName);
-
-            console.log('PDF downloaded successfully!');
+            // Hide everything
+            cert.style.position = 'absolute';
+            cert.style.left = '-9999px';
+            cert.style.transform = '';
+            cert.style.opacity = '0';
+            cert.style.visibility = 'hidden';
+            overlay.remove();
 
         } catch (error) {
-            console.error('PDF generation error:', error);
-            alert('Error generating PDF: ' + error.message);
+            console.error('PDF error:', error);
+            alert('PDF generation failed: ' + error.message);
 
-            // Make sure to hide certificate on error
+            // Cleanup on error
             const cert = document.getElementById('print-certificate');
+            const overlay = document.getElementById('cert-overlay');
             if (cert) {
                 cert.style.position = 'absolute';
                 cert.style.left = '-9999px';
                 cert.style.opacity = '0';
             }
+            if (overlay) overlay.remove();
         }
     };
 
