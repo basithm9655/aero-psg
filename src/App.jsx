@@ -844,88 +844,17 @@ function CertificateVault({ soundOn, playSfx }) {
         }
     };
 
-    const handlePrint = async () => {
+    const handlePrint = () => {
         if (soundOn) playSfx('click');
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        console.log('Print triggered, isMobile:', isMobile);
+        // Simple and reliable: just trigger print
+        // All show/hide logic is in CSS @media print
+        console.log('Triggering print...');
 
-        const printCert = document.getElementById('print-certificate');
-        if (!printCert) {
-            console.error('Certificate not found');
-            window.print();
-            return;
-        }
-
-        // COMPLETELY NEW APPROACH: Clone instead of move
-        // Create a fresh print container
-        const printContainer = document.createElement('div');
-        printContainer.id = 'mobile-print-container';
-        printContainer.style.cssText = `
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 297mm;
-            height: 210mm;
-            background: white;
-            z-index: 999999;
-            visibility: visible;
-            opacity: 1;
-        `;
-
-        // Clone the certificate content
-        printContainer.innerHTML = printCert.innerHTML;
-
-        // Add to body
-        document.body.appendChild(printContainer);
-
-        // Force reflow
-        void printContainer.offsetHeight;
-
-        // Wait for images in the CLONE
-        const images = printContainer.querySelectorAll('img');
-        console.log('Loading', images.length, 'images in clone');
-
-        const imagePromises = Array.from(images).map((img, i) => {
-            if (img.complete && img.naturalHeight > 0) {
-                console.log(`Clone image ${i} ready`);
-                return Promise.resolve();
-            }
-            return new Promise(resolve => {
-                img.onload = () => {
-                    console.log(`Clone image ${i} loaded`);
-                    resolve();
-                };
-                img.onerror = () => {
-                    console.log(`Clone image ${i} error`);
-                    resolve();
-                };
-                setTimeout(resolve, isMobile ? 8000 : 3000);
-            });
-        });
-
-        await Promise.all(imagePromises);
-
-        // Wait for fonts
-        await document.fonts.ready;
-
-        // Double RAF for paint
-        await new Promise(r => requestAnimationFrame(r));
-        await new Promise(r => requestAnimationFrame(r));
-
-        // Extra mobile delay
-        await new Promise(r => setTimeout(r, isMobile ? 1000 : 300));
-
-        console.log('Ready to print');
-
-        // Print
-        window.print();
-
-        // Cleanup
+        // Small delay to ensure any animations complete
         setTimeout(() => {
-            printContainer.remove();
-            console.log('Cleaned up print container');
-        }, isMobile ? 500 : 200);
+            window.print();
+        }, 100);
     };
 
     const reset = () => {

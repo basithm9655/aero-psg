@@ -12,6 +12,21 @@
     --grey: #444;
 }
 
+/* ========================================
+   SCREEN MODE - Certificate Hidden But In DOM
+   ======================================== */
+#print-certificate {
+    /* Keep in DOM but hide off-screen */
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 297mm;
+    height: 210mm;
+    opacity: 0;
+    pointer-events: none;
+    /* CRITICAL: Don't use display:none - element must be rendered! */
+}
+
 /* Certificate container - A4 landscape */
 .certificate-wrapper {
     width: 297mm;
@@ -320,8 +335,8 @@
 }
 
 /* ========================================
-   OPTIMIZED PRINT STYLES - SIMPLE & RELIABLE
-   Works on all devices and browsers
+   OPTIMIZED PRINT STYLES - CSS-ONLY APPROACH
+   Most reliable method for mobile and desktop
    ======================================== */
 @media print {
 
@@ -339,7 +354,7 @@
     }
 
     /* Hide everything except the certificate */
-    body>*:not(#print-certificate):not(#mobile-print-container) {
+    body>*:not(#print-certificate) {
         display: none !important;
     }
 
@@ -353,9 +368,8 @@
         background: white !important;
     }
 
-    /* Certificate must fill page exactly */
-    #print-certificate,
-    #mobile-print-container {
+    /* Bring certificate on-screen for print */
+    #print-certificate {
         display: block !important;
         position: absolute !important;
         left: 0 !important;
@@ -368,11 +382,11 @@
         visibility: visible !important;
         opacity: 1 !important;
         background: white !important;
+        pointer-events: auto !important;
     }
 
     /* Certificate wrapper - exact dimensions */
-    #print-certificate .certificate-wrapper,
-    #mobile-print-container .certificate-wrapper {
+    #print-certificate .certificate-wrapper {
         width: 297mm !important;
         height: 210mm !important;
         margin: 0 !important;
@@ -385,15 +399,13 @@
     }
 
     /* Ensure all certificate content is visible */
-    #print-certificate *,
-    #mobile-print-container * {
+    #print-certificate * {
         visibility: visible !important;
         opacity: 1 !important;
     }
 
     /* Ensure images render */
-    #print-certificate img,
-    #mobile-print-container img {
+    #print-certificate img {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
