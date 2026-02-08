@@ -844,17 +844,65 @@ function CertificateVault({ soundOn, playSfx }) {
         }
     };
 
-    const handlePrint = () => {
+    const handlePrint = async () => {
         if (soundOn) playSfx('click');
 
-        // Simple and reliable: just trigger print
-        // All show/hide logic is in CSS @media print
-        console.log('Triggering print...');
+        try {
+            // Import libraries dynamically
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
 
-        // Small delay to ensure any animations complete
-        setTimeout(() => {
-            window.print();
-        }, 100);
+            const certificateElement = document.getElementById('print-certificate');
+            if (!certificateElement) {
+                alert('Certificate not found!');
+                return;
+            }
+
+            console.log('Generating PDF...');
+
+            // Show certificate temporarily for capture
+            certificateElement.style.position = 'fixed';
+            certificateElement.style.left = '0';
+            certificateElement.style.top = '0';
+            certificateElement.style.opacity = '1';
+            certificateElement.style.zIndex = '9999';
+
+            // Capture certificate as high-quality image
+            const canvas = await html2canvas(certificateElement, {
+                scale: 2, // High quality
+                useCORS: true, // Handle cross-origin images
+                allowTaint: true,
+                backgroundColor: '#FFFDF5',
+                width: 1122, // A4 landscape width in pixels at 96dpi
+                height: 794  // A4 landscape height in pixels at 96dpi
+            });
+
+            // Hide certificate again
+            certificateElement.style.position = 'absolute';
+            certificateElement.style.left = '-9999px';
+            certificateElement.style.opacity = '0';
+
+            // Create PDF (A4 landscape)
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Add image to PDF
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+
+            // Download PDF
+            const fileName = `${certificateData.name.replace(/\s+/g, '_')}_Certificate.pdf`;
+            pdf.save(fileName);
+
+            console.log('PDF downloaded successfully!');
+
+        } catch (error) {
+            console.error('PDF generation error:', error);
+            alert('Error generating PDF. Please try again.');
+        }
     };
 
     const reset = () => {
