@@ -844,80 +844,25 @@ function CertificateVault({ soundOn, playSfx }) {
         }
     };
 
-    const handlePrint = () => {
+    const handlePrint = async () => {
         if (soundOn) playSfx('click');
 
-        // SIMPLEST BULLETPROOF METHOD: Show certificate, let browser print
-        const cert = document.getElementById('print-certificate');
-        if (!cert) {
-            alert('Certificate not found!');
-            return;
+        try {
+            // Import the PDF generator utility
+            const { generateCertificatePDF, generatePDFFilename } = await import('./utils/pdfGenerator');
+
+            // Generate filename
+            const filename = generatePDFFilename(certificateData);
+
+            // Generate PDF (pdfGenerator handles element visibility)
+            await generateCertificatePDF('print-certificate', filename);
+
+            if (soundOn) playSfx('success');
+        } catch (error) {
+            console.error('PDF generation error:', error);
+            alert('Failed to generate PDF. Please try again.');
+            if (soundOn) playSfx('denied');
         }
-
-        // Show certificate in full-screen modal
-        cert.style.position = 'fixed';
-        cert.style.left = '50%';
-        cert.style.top = '50%';
-        cert.style.transform = 'translate(-50%, -50%)';
-        cert.style.opacity = '1';
-        cert.style.visibility = 'visible';
-        cert.style.zIndex = '999999';
-        cert.style.maxWidth = '90vw';
-        cert.style.maxHeight = '90vh';
-        cert.style.overflow = 'auto';
-
-        // Dark overlay
-        const overlay = document.createElement('div');
-        overlay.id = 'cert-modal-overlay';
-        overlay.innerHTML = `
-            <div style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0,0,0,0.95);
-                z-index: 999998;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            ">
-                <div style="
-                    position: absolute;
-                    top: 20px;
-                    right: 20px;
-                    display: flex;
-                    gap: 10px;
-                    z-index: 1000000;
-                ">
-                    <button onclick="window.print()" style="
-                        padding: 12px 24px;
-                        background: #00ff00;
-                        color: black;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 16px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        box-shadow: 0 4px 12px rgba(0,255,0,0.3);
-                    ">📄 PRINT TO PDF</button>
-                    <button onclick="document.getElementById('cert-modal-overlay').remove(); document.getElementById('print-certificate').style.position='absolute'; document.getElementById('print-certificate').style.left='-9999px'; document.getElementById('print-certificate').style.opacity='0';" style="
-                        padding: 12px 24px;
-                        background: #ff4444;
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 16px;
-                        cursor: pointer;
-                    ">✕ Close</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-
-        console.log('Certificate visible - click PRINT TO PDF button');
     };
 
     const reset = () => {

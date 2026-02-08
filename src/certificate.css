@@ -4,12 +4,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;800&family=Great+Vibes&family=Pinyon+Script&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-    --navy: #001f3f;
-    --blue: #003366;
+    --cream: #FFFDF5;
+    --navy: #001F3F;
+    --blue: #003d82;
     --gold: #D4AF37;
     --gold-light: #F9E076;
-    --cream: #FFFDF5;
-    --grey: #444;
+    --gold-dark: #B8941E;
+    --grey: #333;
 }
 
 /* ========================================
@@ -20,12 +21,25 @@
     position: absolute;
     left: -9999px;
     top: -9999px;
-    width: 297mm;
-    height: 210mm;
+    width: 1122px;
+    /* Exact A4 landscape width in pixels */
+    height: 794px;
+    /* Exact A4 landscape height in pixels */
     opacity: 0;
     pointer-events: none;
     /* CRITICAL: Don't use display:none - element must be rendered! */
 }
+
+/* When PDF is being generated, remove transforms */
+#print-certificate.pdf-generating,
+#print-certificate.pdf-generating .certificate-wrapper {
+    transform: none !important;
+    width: 1122px !important;
+    height: 794px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
 
 /* Certificate container - A4 landscape */
 .certificate-wrapper {
@@ -43,38 +57,57 @@
     print-color-adjust: exact !important;
     color-adjust: exact !important;
 
-    /* Guilloche-like Pattern */
+    /* Enhanced Guilloche Pattern with gold accents */
     background-image:
-        radial-gradient(circle at 50% 50%, transparent 60%, rgba(212, 175, 55, 0.03) 100%),
-        repeating-linear-gradient(45deg, rgba(0, 51, 102, 0.02) 0px, rgba(0, 51, 102, 0.02) 1px, transparent 1px, transparent 10px),
-        repeating-linear-gradient(-45deg, rgba(0, 51, 102, 0.02) 0px, rgba(0, 51, 102, 0.02) 1px, transparent 1px, transparent 10px);
+        radial-gradient(circle at 50% 50%, transparent 60%, rgba(212, 175, 55, 0.05) 100%),
+        repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0px, rgba(212, 175, 55, 0.03) 1px, transparent 1px, transparent 12px),
+        repeating-linear-gradient(-45deg, rgba(0, 51, 102, 0.02) 0px, rgba(0, 51, 102, 0.02) 1px, transparent 1px, transparent 12px),
+        repeating-linear-gradient(90deg, rgba(212, 175, 55, 0.015) 0px, rgba(212, 175, 55, 0.015) 2px, transparent 2px, transparent 20px);
 }
 
-/* Watermark */
+/* Watermark - Enhanced visibility */
 .cert-watermark {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    opacity: 0.08;
+    width: 520px;
+    opacity: 0.09;
     pointer-events: none;
-    filter: grayscale(100%) sepia(20%);
+    filter: grayscale(100%) sepia(25%) saturate(0.8);
     z-index: 1;
 }
 
-/* Frame borders */
+/* PREMIUM TRIPLE GOLD FRAME - Luxurious */
 .cert-frame {
     position: absolute;
-    top: 10mm;
-    left: 10mm;
-    right: 10mm;
-    bottom: 10mm;
-    border: 4mm solid transparent;
-    border-image: linear-gradient(to right, var(--gold), var(--gold-light), var(--gold)) 1;
+    top: 8mm;
+    left: 8mm;
+    right: 8mm;
+    bottom: 8mm;
+    /* Outer premium gold border with gradient */
+    border: 6px solid;
+    border-image: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark), var(--gold), var(--gold-light)) 1;
     z-index: 5;
     pointer-events: none;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow:
+        inset 0 0 40px rgba(212, 175, 55, 0.2),
+        0 8px 25px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(212, 175, 55, 0.3);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-frame::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 2px solid var(--gold-light);
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
@@ -82,118 +115,129 @@
 .cert-frame::after {
     content: '';
     position: absolute;
-    top: 2mm;
-    left: 2mm;
-    right: 2mm;
-    bottom: 2mm;
-    border: 1px dashed var(--navy);
+    top: 4mm;
+    left: 4mm;
+    right: 4mm;
+    bottom: 4mm;
+    border: 1.5px solid var(--gold);
+    opacity: 0.7;
+    box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15);
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
 
-/* Corner decorations */
+/* Premium Corner Ornaments - LUXURIOUS with jewels */
 .cert-corner {
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     background-size: contain;
     background-repeat: no-repeat;
     z-index: 6;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H30L10 10V30H0V0Z' fill='%23001F3F'/%3E%3Cpath d='M5 5H35L15 15V35H5V5Z' fill='%23D4AF37' opacity='0.6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='75' height='75' viewBox='0 0 75 75' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H38L13 13V38H0V0Z' fill='%23D4AF37'/%3E%3Cpath d='M5 5H43L18 18V43H5V5Z' fill='%23F9E076' opacity='0.8'/%3E%3Cpath d='M3 3H35L12 12V35H3V3Z' fill='%23B8941E' opacity='0.5'/%3E%3Ccircle cx='10' cy='10' r='4' fill='%23001F3F'/%3E%3Ccircle cx='10' cy='10' r='2.5' fill='%23F9E076' opacity='0.9'/%3E%3C/svg%3E");
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
 
 .cert-corner.tl {
-    top: 9mm;
-    left: 9mm;
+    top: 6mm;
+    left: 6mm;
 }
 
 .cert-corner.tr {
-    top: 9mm;
-    right: 9mm;
+    top: 6mm;
+    right: 6mm;
     transform: rotate(90deg);
 }
 
 .cert-corner.br {
-    bottom: 9mm;
-    right: 9mm;
+    bottom: 6mm;
+    right: 6mm;
     transform: rotate(180deg);
 }
 
 .cert-corner.bl {
-    bottom: 9mm;
-    left: 9mm;
+    bottom: 6mm;
+    left: 6mm;
     transform: rotate(270deg);
 }
 
-/* Content layout */
+/* Content layout - REDESIGNED for perfect fit */
 .cert-layout {
     position: absolute;
-    top: 16mm;
-    left: 16mm;
-    right: 16mm;
-    bottom: 16mm;
+    top: 14mm;
+    left: 14mm;
+    right: 14mm;
+    bottom: 22mm;
     display: grid;
-    grid-template-rows: 90px 1fr 80px;
+    grid-template-rows: 65px 1fr 120px;
     text-align: center;
 }
 
-/* Header */
+/* Header - Ultra compact with elegant border */
 .cert-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.5);
-    padding-bottom: 10px;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(to right, transparent, var(--gold), transparent) 1;
+    padding-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .cert-logo {
-    width: 80px;
-    height: 80px;
+    width: 62px;
+    height: 62px;
     object-fit: contain;
 }
 
 .cert-inst-title h1 {
     font-family: 'Cinzel', serif;
-    font-size: 20px;
+    font-size: 16px;
     color: var(--navy);
     margin: 0;
     font-weight: 700;
+    line-height: 1.1;
 }
 
 .cert-inst-title h2 {
     font-family: 'Montserrat', sans-serif;
-    font-size: 10px;
-    letter-spacing: 2px;
+    font-size: 8px;
+    letter-spacing: 1.5px;
     color: #555;
-    margin-top: 5px;
+    margin-top: 3px;
     text-transform: uppercase;
 }
 
-/* Body */
+/* Body - Compact for footer space */
 .cert-body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 10px 0 30px 0;
+    padding: 0;
     position: relative;
     z-index: 5;
 }
 
+/* PREMIUM NAVY BANNER - Reduced for space */
 .cert-main-heading {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 64px;
-    margin: 0;
+    font-size: 60px;
+    margin: 0 auto 0 auto;
     font-weight: 700;
-    letter-spacing: 4px;
-    background: linear-gradient(45deg, var(--navy), #003366);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: 8px;
+    color: var(--gold);
+    background: var(--navy);
+    padding: 14px 50px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    position: relative;
+    background: linear-gradient(135deg, #001a33 0%, var(--navy) 50%, #002855 100%);
 }
 
 .cert-sub-heading {
@@ -202,7 +246,7 @@
     letter-spacing: 5px;
     color: var(--gold);
     text-transform: uppercase;
-    margin-bottom: 15px;
+    margin: 6px 0 14px 0;
     font-weight: 600;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -211,90 +255,99 @@
 .cert-text {
     font-family: 'Playfair Display', serif;
     font-style: italic;
-    font-size: 16px;
+    font-size: 15px;
     color: #666;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .cert-name {
     font-family: 'Pinyon Script', cursive;
-    font-size: 84px;
-    color: var(--blue);
-    margin: 0 0 15px 0;
+    font-size: 82px;
+    color: var(--navy);
+    margin: 3px 0 12px 0;
     line-height: 1.1;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 400;
 }
 
 .cert-details {
     font-family: 'Playfair Display', serif;
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.5;
-    width: 80%;
+    width: 85%;
     margin: 0 auto;
-    color: #333;
+    color: #2d2d2d;
 }
 
 .cert-event {
     font-family: 'Cinzel', serif;
-    font-size: 26px;
+    font-size: 25px;
     color: var(--navy);
     font-weight: 700;
-    margin: 10px 0 5px;
-    padding: 5px 20px;
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-    display: inline-block;
+    margin: 10px 0 6px;
+    padding: 6px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 .cert-organizer {
     font-family: 'Montserrat', sans-serif;
     font-size: 11px;
-    color: #777;
-    margin-top: 10px;
+    color: #666;
+    margin-top: 8px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    line-height: 1.4;
 }
 
-/* Footer */
+/* Footer - MAXIMUM space for labels */
 .cert-footer {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding: 0 40px;
+    padding: 0 25px 15px 25px;
     position: relative;
+    margin-top: auto;
 }
 
 .cert-sig-box {
     text-align: center;
-    width: 220px;
+    width: 165px;
 }
 
 .cert-sig-line {
-    height: 1px;
-    background: #333;
+    height: 2px;
+    background: linear-gradient(to right, transparent 5%, var(--gold) 20%, var(--gold-light) 50%, var(--gold) 80%, transparent 95%);
     width: 100%;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    box-shadow: 0 1px 3px rgba(212, 175, 55, 0.3);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
 }
 
 .cert-sig-role {
     font-family: 'Montserrat', sans-serif;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     color: var(--navy);
     text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
 }
 
 .cert-sig-subtitle {
-    font-size: 10px;
+    font-size: 8px;
     font-style: italic;
     color: #666;
+    margin-top: 1px;
+    line-height: 1.2;
 }
 
-/* Seal */
+/* Seal - HIGH position for clearance */
 .cert-seal-wrapper {
     position: absolute;
     left: 50%;
-    bottom: 10px;
+    bottom: 12px;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -302,17 +355,21 @@
 }
 
 .cert-seal {
-    width: 90px;
-    height: 90px;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    width: 75px;
+    height: 75px;
+    background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold) 50%, var(--gold-dark) 90%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    border: 4px double white;
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.3),
+        inset 0 3px 8px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(212, 175, 55, 0.4);
+    border: 3px double rgba(255, 255, 255, 0.95);
     color: var(--navy);
-    font-size: 40px;
+    font-size: 34px;
     position: relative;
     z-index: 10;
     -webkit-print-color-adjust: exact !important;
@@ -320,16 +377,17 @@
 }
 
 .cert-ribbon {
-    background: var(--navy);
+    background: linear-gradient(135deg, var(--navy) 0%, #003366 100%);
     color: var(--gold);
-    padding: 5px 20px;
+    padding: 4px 18px;
     font-family: 'Cinzel', serif;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 2px;
-    margin-top: -15px;
+    margin-top: -14px;
     position: relative;
     z-index: 9;
     clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%);
+    font-weight: 600;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
