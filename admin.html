@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Event Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #002855;
+            --secondary: #c5a059;
+            --bg: #f4f7f6;
+            --surface: #ffffff;
+            --text: #333;
+            --text-light: #777;
+            --success: #2e7d32;
+            --danger: #d32f2f;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .navbar .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar img {
+            height: 35px;
+            width: auto;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Stats & Search */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .stat-item p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 40, 85, 0.15);
+        }
+
+        /* Student List */
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* List Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .student-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eee;
+            border-left: 5px solid transparent;
+            transition: all 0.2s ease;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        /* Avatar */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #eee;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .student-card.present {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+            /* Lighter Green */
+            border-color: #dcfce7;
+        }
+
+        .student-flex-group {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            /* Pill shape */
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            margin-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-refresh {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+        }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #e53935, #c62828);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(211, 47, 47, 0.3);
+        }
+
+        .btn-action:active {
+            transform: scale(0.95);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 40, 85, 0.95);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .student-card.present {
+            border-left-color: var(--success);
+            background: #f8fff9;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .student-meta {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .roll-badge {
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            margin-right: 8px;
+            color: #555;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px var(--success);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Place Select */
+        .place-select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: white;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .place-select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .place-select.rank-1 {
+            border-color: #ffd700;
+            background: #fffdf0;
+            color: #b8860b;
+            font-weight: bold;
+        }
+
+        .place-select.rank-2 {
+            border-color: #c0c0c0;
+            background: #fdfdfd;
+            color: #757575;
+            font-weight: bold;
+        }
+
+        .place-select.rank-3 {
+            border-color: #cd7f32;
+            background: #fff5ee;
+            color: #a0522d;
+            font-weight: bold;
+        }
+
+        /* Loading */
+        #loader {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .modal button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 10px 15px;
+            }
+
+            .navbar h1 {
+                display: none;
+                /* Hide title on mobile to make space */
+            }
+
+            .navbar .brand {
+                gap: 5px;
+            }
+
+            /* Icon-only buttons on mobile */
+            .btn-action {
+                padding: 8px;
+                border-radius: 50%;
+                /* Circle */
+                width: 36px;
+                height: 36px;
+                justify-content: center;
+                margin-left: 5px;
+            }
+
+            .btn-action span {
+                font-size: 18px !important;
+                /* Bigger icon */
+                margin: 0;
+            }
+
+            /* Hide text in buttons */
+            .btn-action {
+                font-size: 0;
+            }
+
+            .navbar img {
+                height: 28px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .controls {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-item h3 {
+                font-size: 18px;
+            }
+
+            .stat-item p {
+                font-size: 10px;
+            }
+
+            .search-box input {
+                padding: 12px 35px 12px 15px;
+                /* Space for X icon */
+                font-size: 14px;
+            }
+
+            .student-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 15px;
+            }
+
+            .student-info {
+                width: 100%;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+                margin-bottom: 5px;
+            }
+
+            .student-flex-group {
+                width: 100%;
+            }
+
+            .actions {
+                width: 100%;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .place-select {
+                flex: 1;
+                font-size: 13px;
+                min-width: 0;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+            display: block;
+        }
+
+        /* Clear Search Button */
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+            font-size: 18px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="brand">
+            <img src="collegelogo2.png" alt="Logo">
+            <h1>Admin Panel</h1>
+            <button class="btn-action btn-refresh" onclick="fetchStudents()">
+                <span style="font-size: 16px;">🔄</span> Refresh
+            </button>
+            <button class="btn-action btn-delete" onclick="promptDelete()">
+                <span style="font-size: 16px;">🗑️</span> Delete All
+            </button>
+        </div>
+        <img src="logo-removebg-preview.png" alt="Association Logo" style="height: 40px; width: auto;">
+    </nav>
+
+    <div class="container">
+
+        <div class="controls">
+            <div class="stat-card">
+                <div class="stat-item">
+                    <h3 id="countTotal">0</h3>
+                    <p>Total</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="countPresent">0</h3>
+                    <p>Present</p>
+                </div>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by Name or Roll No...">
+                <span class="clear-search" id="clearSearch" onclick="clearSearch()">✕</span>
+            </div>
+        </div>
+
+        <div id="loader">
+            <div class="spinner"></div>
+            Loading Student Data...
+        </div>
+
+        <div class="student-list" id="studentList">
+            <!-- Student Cards will be injected here -->
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast">Update Saved</div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPass" placeholder="Enter Password"
+                onkeypress="if(event.key==='Enter') verifyAdmin()">
+            <button onclick="verifyAdmin()">Login</button>
+            <p id="loginError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect Password
+            </p>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <h2 style="color: #d32f2f;">⚠️ Delete All Data?</h2>
+            <p>This will permanently delete all student records.</p>
+            <input type="password" id="deletePass" placeholder="Enter Password"
+                onkeypress="if(event.key==='Enter') confirmDelete()">
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeDelete()" style="background: #ccc; color: #333;">Cancel</button>
+                <button onclick="confirmDelete()" style="background: #d32f2f;">DELETE</button>
+            </div>
+            <p id="deleteError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect Password
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec';
+
+        let allStudents = [];
+
+        async function fetchStudents() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getAll`);
+                const result = await response.json();
+
+                if (result.success) {
+                    allStudents = result.data;
+                    renderList(allStudents);
+                    updateStats();
+                    document.getElementById('loader').style.display = 'none';
+                } else {
+                    document.getElementById('loader').innerHTML = "Failed to load data.";
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loader').innerHTML = "Error connecting to server. <br> Check if the script is deployed correctly.";
+            }
+        }
+
+        function renderList(students) {
+            const listContainer = document.getElementById('studentList');
+            listContainer.innerHTML = '';
+
+            if (students.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">🔍</span>
+                        <h3>No Students Found</h3>
+                        <p>Try adjusting your search or refresh the data.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Performance: Use Fragment
+            const fragment = document.createDocumentFragment();
+
+            students.forEach((student, index) => {
+                const isPresent = String(student.attendance) === "1";
+                const place = String(student.place).trim(); // "1", "2", "3", or empty
+
+                // Avatar Initials
+                const initials = student.name.split(' ').map(n => n[0]).slice(0, 2).join('');
+                // Deterministic Color based on roll no
+                const colors = ['#e3f2fd', '#e8eaf6', '#f3e5f5', '#fff3e0', '#e0f2f1'];
+                const colorIndex = (student.rollNo || 0).toString().charCodeAt(0) % colors.length;
+                const avatarBg = colors[colorIndex];
+
+                const card = document.createElement('div');
+                card.className = `student-card ${isPresent ? 'present' : ''}`;
+                card.id = `card-${student.rollNo}`;
+                card.style.animationDelay = `${Math.min(index * 0.03, 1)}s`; // Stagger max 1s
+
+                card.innerHTML = `
+                    <div class="student-flex-group">
+                        <div class="avatar" style="background: ${avatarBg}">${initials}</div>
+                        <div class="student-info">
+                            <div class="student-name">${student.name}</div>
+                            <div class="student-meta"><span class="roll-badge">${student.rollNo}</span> ${student.dept}</div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <!-- Place Select -->
+                        <select class="place-select ${getRankClass(place)}" onchange="updateRecord('${student.rollNo}', 'place', this.value, this)">
+                            <option value="" ${place === '' ? 'selected' : ''}>Participant</option>
+                            <option value="1" ${place === '1' ? 'selected' : ''}>🥇 1st Place</option>
+                            <option value="2" ${place === '2' ? 'selected' : ''}>🥈 2nd Place</option>
+                            <option value="3" ${place === '3' ? 'selected' : ''}>🥉 3rd Place</option>
+                        </select>
+
+                        <!-- Attendance Toggle -->
+                        <label class="switch">
+                            <input type="checkbox" ${isPresent ? 'checked' : ''} onchange="updateRecord('${student.rollNo}', 'attendance', this.checked ? '1' : '', this)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                `;
+                fragment.appendChild(card);
+            });
+
+            listContainer.appendChild(fragment);
+        }
+
+        function getRankClass(val) {
+            if (val === '1') return 'rank-1';
+            if (val === '2') return 'rank-2';
+            if (val === '3') return 'rank-3';
+            return '';
+        }
+
+        // Optimistic UI Update with Debounce/Queue could be better, but simple direct call for now.
+        async function updateRecord(rollNo, field, value, element) {
+            // UI Feedback
+            if (field === 'attendance') {
+                const card = document.getElementById(`card-${rollNo}`);
+                if (value === '1') card.classList.add('present');
+                else card.classList.remove('present');
+
+                // Update local data for stats
+                const s = allStudents.find(s => s.rollNo === rollNo);
+                if (s) s.attendance = value;
+                updateStats();
+            }
+
+            if (field === 'place') {
+                // Update styling
+                element.className = `place-select ${getRankClass(value)}`;
+                // Update local
+                const s = allStudents.find(s => s.rollNo === rollNo);
+                if (s) s.place = value;
+            }
+
+            // Sync with Server
+            try {
+                // Use no-cors to avoid CORS errors if pure text isn't returned, 
+                // but since we return JSON, standard CORS should work if script is "Anyone".
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'update', rollNo, field, value })
+                });
+
+                // Since this might be opaque/no-cors depending on browser restrictions with Apps Script:
+                // We assume success if no network error. Use console for debugging.
+                const respText = await response.text();
+                console.log("Server response:", respText);
+                showToast("Saved ✓");
+
+            } catch (error) {
+                console.error("Update failed", error);
+                showToast("Error Saving!", true);
+                // Ideally revert UI change here
+            }
+        }
+
+        function updateStats() {
+            const total = allStudents.length;
+            const present = allStudents.filter(s => String(s.attendance) === "1").length;
+            document.getElementById('countTotal').innerText = total;
+            document.getElementById('countPresent').innerText = present;
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.background = isError ? '#d32f2f' : '#333';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Search Logic
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            clearBtn.style.display = term ? 'block' : 'none';
+
+            const filtered = allStudents.filter(s =>
+                s.name.toLowerCase().includes(term) ||
+                String(s.rollNo).toLowerCase().includes(term)
+            );
+            renderList(filtered);
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            renderList(allStudents);
+            searchInput.focus();
+        }
+
+        // Init - Blocked by Login
+        // fetchStudents(); 
+
+        // --- Security Logic ---
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === '9182') {
+                document.getElementById('loginModal').style.display = 'none';
+                fetchStudents(); // Load data only after login
+            } else {
+                const err = document.getElementById('loginError');
+                err.style.display = 'block';
+                err.innerText = "Incorrect Password!";
+                document.getElementById('adminPass').value = '';
+                document.getElementById('adminPass').focus();
+            }
+        }
+
+        // --- Delete Logic ---
+        function promptDelete() {
+            document.getElementById('deleteModal').style.display = 'flex';
+            document.getElementById('deletePass').value = '';
+            document.getElementById('deleteError').style.display = 'none';
+            document.getElementById('deletePass').focus();
+        }
+
+        function closeDelete() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function confirmDelete() {
+            const pass = document.getElementById('deletePass').value;
+            if (pass === '2819') {
+                // Execute Delete
+                document.getElementById('deleteModal').innerHTML = '<div class="modal"><h3>Deleting...</h3><div class="spinner"></div></div>';
+
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'clearAll' })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert("Database Cleared Successfully!");
+                        location.reload();
+                    } else {
+                        alert("Failed: " + result.message);
+                        location.reload();
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Error connecting to server.");
+                    location.reload();
+                }
+
+            } else {
+                const err = document.getElementById('deleteError');
+                err.style.display = 'block';
+                err.innerText = "Wrong Confirmation Password!";
+                document.getElementById('deletePass').value = '';
+            }
+        }
+
+        // Refresh every 30s to keep sync? Maybe too much. Let's stick to manual load.
+    </script>
+</body>
+
+</html>

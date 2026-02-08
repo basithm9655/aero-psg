@@ -1,0 +1,430 @@
+/* Certificate Template Styles */
+/* Premium certificate design with A4 landscape layout */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;800&family=Great+Vibes&family=Pinyon+Script&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+    --navy: #001f3f;
+    --blue: #003366;
+    --gold: #D4AF37;
+    --gold-light: #F9E076;
+    --cream: #FFFDF5;
+    --grey: #444;
+}
+
+/* Certificate container - A4 landscape */
+.certificate-wrapper {
+    width: 297mm;
+    height: 210mm;
+    background-color: var(--cream);
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    color: var(--grey);
+    overflow: hidden;
+    margin: 20px auto;
+
+    /* Force backgrounds to print */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+
+    /* Guilloche-like Pattern */
+    background-image:
+        radial-gradient(circle at 50% 50%, transparent 60%, rgba(212, 175, 55, 0.03) 100%),
+        repeating-linear-gradient(45deg, rgba(0, 51, 102, 0.02) 0px, rgba(0, 51, 102, 0.02) 1px, transparent 1px, transparent 10px),
+        repeating-linear-gradient(-45deg, rgba(0, 51, 102, 0.02) 0px, rgba(0, 51, 102, 0.02) 1px, transparent 1px, transparent 10px);
+}
+
+/* Watermark */
+.cert-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    opacity: 0.08;
+    pointer-events: none;
+    filter: grayscale(100%) sepia(20%);
+    z-index: 1;
+}
+
+/* Frame borders */
+.cert-frame {
+    position: absolute;
+    top: 10mm;
+    left: 10mm;
+    right: 10mm;
+    bottom: 10mm;
+    border: 4mm solid transparent;
+    border-image: linear-gradient(to right, var(--gold), var(--gold-light), var(--gold)) 1;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-frame::after {
+    content: '';
+    position: absolute;
+    top: 2mm;
+    left: 2mm;
+    right: 2mm;
+    bottom: 2mm;
+    border: 1px dashed var(--navy);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* Corner decorations */
+.cert-corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 6;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H30L10 10V30H0V0Z' fill='%23001F3F'/%3E%3Cpath d='M5 5H35L15 15V35H5V5Z' fill='%23D4AF37' opacity='0.6'/%3E%3C/svg%3E");
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-corner.tl {
+    top: 9mm;
+    left: 9mm;
+}
+
+.cert-corner.tr {
+    top: 9mm;
+    right: 9mm;
+    transform: rotate(90deg);
+}
+
+.cert-corner.br {
+    bottom: 9mm;
+    right: 9mm;
+    transform: rotate(180deg);
+}
+
+.cert-corner.bl {
+    bottom: 9mm;
+    left: 9mm;
+    transform: rotate(270deg);
+}
+
+/* Content layout */
+.cert-layout {
+    position: absolute;
+    top: 16mm;
+    left: 16mm;
+    right: 16mm;
+    bottom: 16mm;
+    display: grid;
+    grid-template-rows: 90px 1fr 80px;
+    text-align: center;
+}
+
+/* Header */
+.cert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+    padding-bottom: 10px;
+}
+
+.cert-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.cert-inst-title h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin: 0;
+    font-weight: 700;
+}
+
+.cert-inst-title h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #555;
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+/* Body */
+.cert-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 0 30px 0;
+    position: relative;
+    z-index: 5;
+}
+
+.cert-main-heading {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 64px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 4px;
+    background: linear-gradient(45deg, var(--navy), #003366);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-sub-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    font-weight: 600;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.cert-name {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 84px;
+    color: var(--blue);
+    margin: 0 0 15px 0;
+    line-height: 1.1;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cert-details {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    line-height: 1.5;
+    width: 80%;
+    margin: 0 auto;
+    color: #333;
+}
+
+.cert-event {
+    font-family: 'Cinzel', serif;
+    font-size: 26px;
+    color: var(--navy);
+    font-weight: 700;
+    margin: 10px 0 5px;
+    padding: 5px 20px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    display: inline-block;
+}
+
+.cert-organizer {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    color: #777;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Footer */
+.cert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 40px;
+    position: relative;
+}
+
+.cert-sig-box {
+    text-align: center;
+    width: 220px;
+}
+
+.cert-sig-line {
+    height: 1px;
+    background: #333;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.cert-sig-role {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+}
+
+.cert-sig-subtitle {
+    font-size: 10px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Seal */
+.cert-seal-wrapper {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cert-seal {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 4px double white;
+    color: var(--navy);
+    font-size: 40px;
+    position: relative;
+    z-index: 10;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.cert-ribbon {
+    background: var(--navy);
+    color: var(--gold);
+    padding: 5px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-top: -15px;
+    position: relative;
+    z-index: 9;
+    clip-path: polygon(0 0, 100% 0, 95% 50%, 100% 100%, 0 100%, 5% 50%);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* ========================================
+   OPTIMIZED PRINT STYLES - SIMPLE & RELIABLE
+   Works on all devices and browsers
+   ======================================== */
+@media print {
+
+    /* Page setup - A4 Landscape, no margins */
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+
+    /* Force exact color reproduction */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Hide everything except the certificate */
+    body>*:not(#print-certificate):not(#mobile-print-container) {
+        display: none !important;
+    }
+
+    /* Clean body for PDF */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        overflow: hidden !important;
+        background: white !important;
+    }
+
+    /* Certificate must fill page exactly */
+    #print-certificate,
+    #mobile-print-container {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: white !important;
+    }
+
+    /* Certificate wrapper - exact dimensions */
+    #print-certificate .certificate-wrapper,
+    #mobile-print-container .certificate-wrapper {
+        width: 297mm !important;
+        height: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        transform: none !important;
+        box-shadow: none !important;
+        position: relative !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Ensure all certificate content is visible */
+    #print-certificate *,
+    #mobile-print-container * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Ensure images render */
+    #print-certificate img,
+    #mobile-print-container img {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: none !important;
+    }
+}
+
+
+/* Preview scaling - desktop */
+@media screen {
+    .certificate-wrapper {
+        transform: scale(0.4);
+        transform-origin: top left;
+        margin-bottom: -380px;
+    }
+}
+
+/* Mobile scaling - better view */
+@media screen and (max-width: 768px) {
+    .certificate-wrapper {
+        transform: scale(0.28);
+        transform-origin: top left;
+        margin-bottom: -420px;
+    }
+}
+
+/* Very small mobile */
+@media screen and (max-width: 480px) {
+    .certificate-wrapper {
+        transform: scale(0.25);
+        transform-origin: top left;
+        margin-bottom: -440px;
+    }
+}

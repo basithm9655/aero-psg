@@ -12,23 +12,23 @@ export const EVENTS_DATA = [
     // ========== LIVE EVENT (Shows in Hero with Countdown) ==========
     {
         id: 1,
-        title: "Aerospace    Workshop '26",
-        type: "TECHNICAL WORKSHOP",
+        title: "AeroQuest 2026",
+        type: "TECHNICAL COMPETITION",
         status: "live",        // live, upcoming, or past
         isLive: true,          // ONLY ONE EVENT should have this true!
 
         // EVENT TIMING
-        date: "MAR 15, 2026",
-        time: "10:00 AM - 4:00 PM",
-        eventDate: new Date('2026-04-15T10:00:00'), // For countdown calculation
+        date: "FEB 17-18, 2026",
+        time: "Full Day Event",
+        eventDate: new Date('2026-02-17T09:00:00'), // Prelims start
 
         // VENUE DETAILS
-        venue: "Main Auditorium",
-        hall: "Block 5, Hall A",
-        building: "Aerospace Wing",
+        venue: "G-Block, Room 301",
+        hall: "Room 301",
+        building: "G-Block",
 
         // DESCRIPTIONS
-        details: "Comprehensive hands-on workshop on drone aerodynamics and quadcopter assembly. Learn design principles, flight dynamics, and autonomous control systems.",
+        details: "AeroQuest - Where Curiosity Takes Flight. Two-day aerospace competition with virtual prelims (Feb 17) and offline finals (Feb 18, 2026). Test your aerospace knowledge!",
 
         // REGISTRATION
         registrationLink: "https://forms.gle/your-link", // Your Google Form link
@@ -36,8 +36,13 @@ export const EVENTS_DATA = [
         capacity: 50,
 
         // ADDITIONAL INFO
-        instructor: "Dr. Kumar - Aerospace Department",
-        prerequisites: "Basic physics knowledge",
+        tagline: "Where Curiosity Takes Flight",
+        rounds: "Prelims: 17/02/2026 (Virtual) | Finals: 18/02/2026 (Offline)",
+        contact: "Rahil - 7305457530 | Vasim - 6379737578",
+        instagram: "@aero_psg_tech",
+
+        // CERTIFICATE
+        certificateTitle: "AEROQUEST 2026",
 
         image: "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800",
         phase: "LIVE"

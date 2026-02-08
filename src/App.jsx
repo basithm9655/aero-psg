@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './visual-effects.css'; // Advanced visual effects
+import './certificate.css'; // Certificate styling
 import {
     Rocket, Calendar, ChevronRight, X, Lock,
     Volume2, VolumeX, Instagram, Linkedin, Globe, Cpu,
@@ -15,6 +16,9 @@ import {
 import { playSfx } from './utils/soundEngine';
 import { EVENTS_DATA, getLiveEvent, getAllMissions } from './data/events';
 import { TEAM_DATA } from './data/team';
+
+// Get the current live event for certificate title
+const CURRENT_EVENT = getLiveEvent();
 
 /* --- ASSET BANK --- */
 const SPACE_IMAGES = [
@@ -534,18 +538,75 @@ function SinglePageInterface({ soundOn }) {
                             <p className="text-[#00f0ff] text-xs font-mono-tech tracking-[0.2em]">MISSION SPECIALISTS</p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {TEAM_DATA.map((member, index) => (
-                            <div key={index} onMouseEnter={interact} className="glass-panel p-6 border border-[#00f0ff]/20 clip-hex group hover:bg-[#00f0ff]/5 transition-colors flex items-start gap-4">
-                                <div className="w-12 h-12 bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex-shrink-0 flex items-center justify-center text-[#00f0ff]"><User size={24} /></div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h3 className="text-lg font-display font-bold text-white group-hover:text-[#00f0ff] transition-colors">{member.name}</h3>
-                                        <span className="text-[9px] text-[#00f0ff] border border-[#00f0ff] px-1">{member.clearance}</span>
+                            <div key={index} onMouseEnter={interact} className="glass-panel p-6 border border-[#00f0ff]/20 clip-hex group hover:bg-[#00f0ff]/5 transition-all duration-300 flex flex-col items-center text-center">
+                                {/* Profile Photo */}
+                                <div className="relative mb-4">
+                                    <div className="w-32 h-32 rounded-full border-4 border-[#00f0ff]/30 overflow-hidden bg-[#00f0ff]/10 group-hover:border-[#00f0ff]/50 transition-all duration-300">
+                                        {member.image ? (
+                                            <img
+                                                src={member.image}
+                                                alt={member.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <User size={48} className="text-[#00f0ff]/50" />
+                                            </div>
+                                        )}
                                     </div>
-                                    <p className="text-xs text-gray-400 font-mono-tech uppercase tracking-wider">{member.role}</p>
-                                    <div className="mt-2 text-[10px] text-gray-600 font-mono-tech">ID: {member.id}</div>
-                                    {member.dept && <div className="text-[10px] text-gray-500 font-mono-tech mt-1">{member.dept}</div>}
+                                    {/* Clearance Badge */}
+                                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#00f0ff] text-black px-3 py-1 text-[10px] font-mono-tech font-bold tracking-wider">
+                                        {member.clearance}
+                                    </div>
+                                </div>
+
+                                {/* Member Info */}
+                                <div className="w-full">
+                                    <h3 className="text-lg font-display font-bold text-white group-hover:text-[#00f0ff] transition-colors mb-1">
+                                        {member.name}
+                                    </h3>
+                                    <p className="text-xs text-gray-400 font-mono-tech uppercase tracking-wider mb-2">
+                                        {member.role}
+                                    </p>
+                                    <div className="text-[10px] text-gray-600 font-mono-tech mb-3">
+                                        ID: {member.id}
+                                    </div>
+                                    {member.dept && (
+                                        <div className="text-[10px] text-gray-500 font-mono-tech mb-3">
+                                            {member.dept}
+                                        </div>
+                                    )}
+
+                                    {/* Contact Links */}
+                                    {(member.email || member.linkedin) && (
+                                        <div className="flex gap-3 justify-center mt-4 pt-3 border-t border-[#00f0ff]/10">
+                                            {member.email && (
+                                                <a
+                                                    href={`mailto:${member.email}`}
+                                                    className="text-[#00f0ff] hover:text-white transition-colors"
+                                                    title="Email"
+                                                >
+                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                                    </svg>
+                                                </a>
+                                            )}
+                                            {member.linkedin && (
+                                                <a
+                                                    href={member.linkedin}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-[#00f0ff] hover:text-white transition-colors"
+                                                    title="LinkedIn"
+                                                >
+                                                    <Linkedin size={20} />
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -708,37 +769,339 @@ function CountdownWidget() {
 
 function CertificateVault({ soundOn, playSfx }) {
     const [roll, setRoll] = useState("");
-    const [state, setState] = useState("IDLE");
-    const search = () => {
+    const [state, setState] = useState("IDLE"); // IDLE, SCAN, FOUND, ERROR
+    const [certificateData, setCertificateData] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const search = async () => {
         if (soundOn) playSfx('click');
-        if (!roll) return;
+        if (!roll.trim()) return;
+
         setState("SCAN");
-        setTimeout(() => {
-            if (roll.length > 3 && roll.toUpperCase().includes('Z')) { setState("FOUND"); if (soundOn) playSfx('success'); }
-            else { setState("ERROR"); if (soundOn) playSfx('denied'); }
-        }, 2000);
+        setErrorMessage("");
+
+        try {
+            // Import the API function
+            const { fetchCertificateData } = await import('./utils/certificateAPI');
+
+            // Fetch certificate data
+            const data = await fetchCertificateData(roll);
+
+            // Success!
+            setCertificateData(data);
+            setState("FOUND");
+            if (soundOn) playSfx('success');
+        } catch (error) {
+            console.error('Certificate fetch error:', error);
+            setErrorMessage(error.message || "Certificate not found");
+            setState("ERROR");
+            if (soundOn) playSfx('denied');
+        }
     };
+
+    const handleDownloadJPG = async () => {
+        if (soundOn) playSfx('click');
+
+        try {
+            // Dynamically import html2canvas
+            const html2canvas = (await import('html2canvas')).default;
+
+            // Get the certificate element
+            const certificateElement = document.getElementById('certificate-for-download');
+
+            if (!certificateElement) {
+                alert('Certificate not found!');
+                return;
+            }
+
+            // Capture the certificate as canvas with high quality
+            const canvas = await html2canvas(certificateElement, {
+                scale: 2, // Higher quality
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#FFFDF5',
+                width: 1122, // A4 landscape in pixels at 96 DPI
+                height: 794
+            });
+
+            // Convert canvas to blob and download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Certificate_${certificateData.rollNo}_${certificateData.name.replace(/\s+/g, '_')}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/jpeg', 0.95);
+
+            if (soundOn) playSfx('success');
+        } catch (error) {
+            console.error('Error downloading certificate:', error);
+            alert('Failed to download certificate. Please try again.');
+            if (soundOn) playSfx('denied');
+        }
+    };
+
+    const handlePrint = async () => {
+        if (soundOn) playSfx('click');
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        console.log('Print triggered, isMobile:', isMobile);
+
+        const printCert = document.getElementById('print-certificate');
+        if (!printCert) {
+            console.error('Certificate not found');
+            window.print();
+            return;
+        }
+
+        // COMPLETELY NEW APPROACH: Clone instead of move
+        // Create a fresh print container
+        const printContainer = document.createElement('div');
+        printContainer.id = 'mobile-print-container';
+        printContainer.style.cssText = `
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 297mm;
+            height: 210mm;
+            background: white;
+            z-index: 999999;
+            visibility: visible;
+            opacity: 1;
+        `;
+
+        // Clone the certificate content
+        printContainer.innerHTML = printCert.innerHTML;
+
+        // Add to body
+        document.body.appendChild(printContainer);
+
+        // Force reflow
+        void printContainer.offsetHeight;
+
+        // Wait for images in the CLONE
+        const images = printContainer.querySelectorAll('img');
+        console.log('Loading', images.length, 'images in clone');
+
+        const imagePromises = Array.from(images).map((img, i) => {
+            if (img.complete && img.naturalHeight > 0) {
+                console.log(`Clone image ${i} ready`);
+                return Promise.resolve();
+            }
+            return new Promise(resolve => {
+                img.onload = () => {
+                    console.log(`Clone image ${i} loaded`);
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.log(`Clone image ${i} error`);
+                    resolve();
+                };
+                setTimeout(resolve, isMobile ? 8000 : 3000);
+            });
+        });
+
+        await Promise.all(imagePromises);
+
+        // Wait for fonts
+        await document.fonts.ready;
+
+        // Double RAF for paint
+        await new Promise(r => requestAnimationFrame(r));
+        await new Promise(r => requestAnimationFrame(r));
+
+        // Extra mobile delay
+        await new Promise(r => setTimeout(r, isMobile ? 1000 : 300));
+
+        console.log('Ready to print');
+
+        // Print
+        window.print();
+
+        // Cleanup
+        setTimeout(() => {
+            printContainer.remove();
+            console.log('Cleaned up print container');
+        }, isMobile ? 500 : 200);
+    };
+
+    const reset = () => {
+        setState("IDLE");
+        setRoll("");
+        setCertificateData(null);
+        setErrorMessage("");
+    };
+
     return (
-        <div className="max-w-4xl mx-auto w-full relative">
-            <div className="absolute -top-10 left-0 text-[#00f0ff]/20 text-[100px] font-display font-black opacity-10 pointer-events-none">VAULT</div>
-            <div className={`glass-panel p-8 md:p-12 border-t-2 border-[#00f0ff] relative overflow-hidden transition-all ${state === "ERROR" ? "border-red-500 animate-shake" : ""}`}>
-                <div className="absolute top-0 right-0 p-4 opacity-10"><Shield size={120} /></div>
-                <div className="relative z-10 text-center mb-10"><h2 className="text-3xl font-display font-bold text-white mb-2">Data Archives</h2><p className="text-[#00f0ff] text-xs font-mono-tech tracking-[0.2em]">CERTIFICATE VERIFICATION PROTOCOL</p></div>
-                {state === "IDLE" || state === "ERROR" ? (
-                    <div className="max-w-md mx-auto flex flex-col gap-6">
-                        <div className="relative group"><Scan className={`absolute left-4 top-1/2 -translate-y-1/2 ${state === "ERROR" ? "text-red-500" : "text-[#00f0ff]"}`} size={20} /><input value={roll} onChange={e => setRoll(e.target.value)} className={`w-full bg-black/60 border py-4 pl-12 pr-4 text-white font-mono-tech placeholder:text-gray-700 focus:outline-none uppercase tracking-widest text-lg ${state === "ERROR" ? "border-red-500" : "border-gray-700 focus:border-[#00f0ff]"}`} placeholder="REG NO. (Ex: 20Z201)" /></div>
-                        <button onClick={search} className={`text-black font-bold py-4 font-display uppercase tracking-[0.2em] hover:bg-white transition-colors clip-tech ${state === "ERROR" ? "bg-red-500" : "bg-[#00f0ff]"}`}>{state === "ERROR" ? "RETRY SCAN" : "INITIATE SCAN"}</button>
-                        {state === "ERROR" && (<div className="flex items-center justify-center gap-2 text-red-500 font-mono-tech text-xs bg-red-900/10 p-3 border border-red-500/30 text-center animate-pulse"><AlertTriangle size={14} /> ACCESS DENIED: ID NOT FOUND</div>)}
+        <>
+            <div className="max-w-4xl mx-auto w-full relative">
+                <div className="absolute -top-10 left-0 text-[#00f0ff]/20 text-[100px] font-display font-black opacity-10 pointer-events-none">VAULT</div>
+                <div className={`glass-panel p-8 md:p-12 border-t-2 border-[#00f0ff] relative overflow-hidden transition-all ${state === "ERROR" ? "border-red-500 animate-shake" : ""}`}>
+                    <div className="absolute top-0 right-0 p-4 opacity-10"><Shield size={120} /></div>
+                    <div className="relative z-10 text-center mb-10"><h2 className="text-3xl font-display font-bold text-white mb-2">Data Archives</h2><p className="text-[#00f0ff] text-xs font-mono-tech tracking-[0.2em]">CERTIFICATE VERIFICATION PROTOCOL</p></div>
+
+                    {state === "IDLE" || state === "ERROR" ? (
+                        <div className="max-w-md mx-auto flex flex-col gap-6">
+                            <div className="relative group">
+                                <Scan className={`absolute left-4 top-1/2 -translate-y-1/2 ${state === "ERROR" ? "text-red-500" : "text-[#00f0ff]"}`} size={20} />
+                                <input
+                                    value={roll}
+                                    onChange={e => setRoll(e.target.value)}
+                                    onKeyPress={e => e.key === 'Enter' && search()}
+                                    className={`w-full bg-black/60 border py-4 pl-12 pr-4 text-white font-mono-tech placeholder:text-gray-700 focus:outline-none uppercase tracking-widest text-lg ${state === "ERROR" ? "border-red-500" : "border-gray-700 focus:border-[#00f0ff]"}`}
+                                    placeholder="ROLL NO. (Ex: 25U201)"
+                                />
+                            </div>
+                            <button
+                                onClick={search}
+                                className={`text-black font-bold py-4 font-display uppercase tracking-[0.2em] hover:bg-white transition-colors clip-tech ${state === "ERROR" ? "bg-red-500" : "bg-[#00f0ff]"}`}
+                            >
+                                {state === "ERROR" ? "RETRY SCAN" : "INITIATE SCAN"}
+                            </button>
+                            {state === "ERROR" && (
+                                <div className="flex items-center justify-center gap-2 text-red-500 font-mono-tech text-xs bg-red-900/10 p-3 border border-red-500/30 text-center animate-pulse">
+                                    <AlertTriangle size={14} /> {errorMessage || "ACCESS DENIED: ID NOT FOUND"}
+                                </div>
+                            )}
+                        </div>
+                    ) : state === "SCAN" ? (
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 border-4 border-[#00f0ff] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-[#00f0ff] font-mono-tech text-xs animate-pulse">DECRYPTING ARCHIVES...</p>
+                        </div>
+                    ) : state === "FOUND" && certificateData ? (
+                        <div className="space-y-6">
+                            {/* Certificate Info Card - Mobile Optimized */}
+                            <div className="bg-[#00f0ff]/5 border border-[#00f0ff]/20 p-4 sm:p-6 flex flex-col items-center gap-4 sm:gap-6 animate-in zoom-in duration-300 rounded-lg sm:rounded-none">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#00f0ff]/10 flex items-center justify-center border border-[#00f0ff]/30 rounded-lg">
+                                    <FileText size={28} className="text-[#00f0ff] sm:w-8 sm:h-8" />
+                                </div>
+                                <div className="flex-1 text-center w-full">
+                                    <h4 className="font-display font-bold text-white text-base sm:text-lg mb-2">CERTIFICATE LOCATED</h4>
+                                    <p className="text-gray-400 text-xs sm:text-sm font-mono-tech break-words px-2">
+                                        {certificateData.name}
+                                    </p>
+                                    <p className="text-gray-500 text-[10px] sm:text-xs font-mono-tech mt-1">
+                                        ID: {certificateData.rollNo} • {certificateData.year} • {certificateData.dept}
+                                    </p>
+                                </div>
+
+                                {/* Mobile-Optimized Buttons */}
+                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                    <button
+                                        onClick={handlePrint}
+                                        className="bg-green-600 hover:bg-green-500 active:bg-green-700 active:scale-95 text-white px-6 py-4 sm:py-3 font-bold text-sm sm:text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 clip-tech shadow-lg shadow-green-600/30 min-h-[48px]"
+                                    >
+                                        <Download size={16} /> DOWNLOAD PDF
+                                    </button>
+                                    <button
+                                        onClick={reset}
+                                        className="bg-gray-700 hover:bg-gray-600 active:bg-gray-800 active:scale-95 text-white px-6 py-4 sm:py-3 font-bold text-sm sm:text-xs uppercase tracking-widest transition-all clip-tech min-h-[48px]"
+                                    >
+                                        NEW SCAN
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Certificate Preview - Mobile Optimized */}
+                            <div className="border border-[#00f0ff]/20 p-3 sm:p-4 bg-black/20 rounded-lg sm:rounded-none">
+                                <p className="text-[#00f0ff] text-xs font-mono-tech tracking-widest mb-3 sm:mb-4 text-center">CERTIFICATE PREVIEW</p>
+                                <div className="overflow-x-auto overflow-y-hidden max-h-[400px] sm:max-h-[500px] md:max-h-[600px] -mx-3 sm:mx-0">
+                                    <div className="min-w-[280px] sm:min-w-[300px] px-3 sm:px-0" id="certificate-for-download">
+                                        <CertificateTemplate
+                                            data={certificateData}
+                                            eventTitle={CURRENT_EVENT.certificateTitle || "AEROSPACE EVENT 2026"}
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-gray-500 text-[10px] font-mono-tech text-center mt-3">Scroll to view full certificate</p>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+
+            {/* Hidden full certificate for printing - MUST be direct child of root */}
+            {state === "FOUND" && certificateData && (
+                <div id="print-certificate" style={{ display: 'none' }}>
+                    <CertificateTemplate
+                        data={certificateData}
+                        eventTitle={CURRENT_EVENT.certificateTitle || "AEROSPACE EVENT 2026"}
+                    />
+                </div>
+            )}
+        </>
+    );
+}
+
+// Certificate Template Component (embedded)
+function CertificateTemplate({ data, eventTitle = "AEROSPACE EVENT 2026" }) {
+    if (!data) return null;
+
+    const isParticipation = !data.place || data.place.toLowerCase().includes('participated');
+    const subtitle = isParticipation ? "OF PARTICIPATION" : "OF MERIT";
+
+    let actionText = "actively <b>participated</b> in";
+    if (!isParticipation) {
+        const cleanPlace = data.place?.replace(/Achieved |Winner - /gi, '') || '';
+        actionText = `secured <b style="color:var(--navy); border-bottom:1px solid var(--gold);">${cleanPlace}</b> in`;
+    }
+
+    return (
+        <div className="certificate-wrapper">
+            <img src="/collegelogo2.png" className="cert-watermark" alt="Watermark" />
+            <div className="cert-frame"></div>
+            <div className="cert-corner tl"></div>
+            <div className="cert-corner tr"></div>
+            <div className="cert-corner bl"></div>
+            <div className="cert-corner br"></div>
+
+            <div className="cert-layout">
+                <div className="cert-header">
+                    <img src="/collegelogo2.png" className="cert-logo" alt="College Logo" />
+                    <div className="cert-inst-title">
+                        <h1>Dr. Satish Dhawan Aerospace<br />Engineering Association</h1>
+                        <h2>PSG College of Technology</h2>
                     </div>
-                ) : state === "SCAN" ? (
-                    <div className="text-center py-12"><div className="w-16 h-16 border-4 border-[#00f0ff] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-[#00f0ff] font-mono-tech text-xs animate-pulse">DECRYPTING ARCHIVES...</p></div>
-                ) : (
-                    <div className="bg-[#00f0ff]/5 border border-[#00f0ff]/20 p-6 flex flex-col md:flex-row items-center gap-6 animate-in zoom-in duration-300">
-                        <div className="w-20 h-20 bg-[#00f0ff]/10 flex items-center justify-center border border-[#00f0ff]/30"><FileText size={32} className="text-[#00f0ff]" /></div>
-                        <div className="flex-1 text-center md:text-left"><h4 className="font-display font-bold text-white text-lg">CERTIFICATE OF EXCELLENCE</h4><p className="text-gray-400 text-xs font-mono-tech mt-1">ID: {roll} // ISSUED: 2026</p></div>
-                        <button className="bg-green-600 hover:bg-green-500 text-white px-8 py-3 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2 clip-tech"><Download size={14} /> Retrieve</button>
+                    <img src="/logo-removebg-preview.png" className="cert-logo" alt="Association Logo" />
+                </div>
+
+                <div className="cert-body">
+                    <div className="cert-main-heading">Certificate</div>
+                    <div className="cert-sub-heading">{subtitle}</div>
+                    <div className="cert-text">This is proudly presented to</div>
+                    <div className="cert-name">{data.name}</div>
+                    <div className="cert-details">
+                        (Roll No: <b>{data.rollNo}</b>), a <b>{data.year}</b> year student of the<br />
+                        Department of <b>{data.dept}</b>,<br />
+                        has <span dangerouslySetInnerHTML={{ __html: actionText }} /> the event
                     </div>
-                )}
+                    <div className="cert-event">{eventTitle}</div>
+                    <div className="cert-organizer">
+                        organized by <b>Dr. Satish Dhawan Aerospace Engineering Association</b>,<br />
+                        PSG College of Technology
+                    </div>
+                </div>
+
+                <div className="cert-footer">
+                    <div className="cert-sig-box">
+                        <div className="cert-sig-line"></div>
+                        <div className="cert-sig-role">Faculty Advisor</div>
+                        <div className="cert-sig-subtitle">Aerospace Association</div>
+                    </div>
+                    <div className="cert-seal-wrapper">
+                        <div className="cert-seal">★</div>
+                        <div className="cert-ribbon">EXCELLENCE</div>
+                    </div>
+                    <div className="cert-sig-box">
+                        <div className="cert-sig-line"></div>
+                        <div className="cert-sig-role">Chief Secretary</div>
+                        <div className="cert-sig-subtitle">Aerospace Association</div>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -783,7 +1146,23 @@ function RegistrationModal({ onClose, soundOn, playSfx }) {
         if (!isNaN(batch)) {
             const now = new Date();
             const currentYear = now.getFullYear();
-            const yearOfStudy = (now.getMonth() >= 6 ? currentYear : currentYear - 1) - (2000 + batch) + 1;
+
+            // Extract the 4th digit to check for lateral entry
+            // Roll format: 25U201 or 25U401
+            // The digit after the letter(s) indicates entry type
+            const rollDigits = r.match(/[A-Z]+(\d)/);
+            const fourthDigit = rollDigits ? parseInt(rollDigits[1]) : 0;
+            const isLateralEntry = fourthDigit === 4;
+
+            // Base year calculation
+            let yearOfStudy = (now.getMonth() >= 6 ? currentYear : currentYear - 1) - (2000 + batch) + 1;
+
+            // Lateral entry students skip 1st year, so they're always +1 year ahead
+            if (isLateralEntry) {
+                yearOfStudy += 1;
+            }
+
+            // Assign year label
             if (yearOfStudy === 1) year = "1st Year";
             else if (yearOfStudy === 2) year = "2nd Year";
             else if (yearOfStudy === 3) year = "3rd Year";
