@@ -860,27 +860,56 @@ function CertificateVault({ soundOn, playSfx }) {
 
             console.log('Generating PDF...');
 
-            // Show certificate temporarily for capture
+            // Show certificate for capture
             certificateElement.style.position = 'fixed';
             certificateElement.style.left = '0';
             certificateElement.style.top = '0';
             certificateElement.style.opacity = '1';
             certificateElement.style.zIndex = '9999';
+            certificateElement.style.visibility = 'visible';
+
+            // CRITICAL: Wait for images to load
+            const images = certificateElement.querySelectorAll('img');
+            const imagePromises = Array.from(images).map(img => {
+                // Add CORS attribute
+                if (!img.crossOrigin) {
+                    img.crossOrigin = 'anonymous';
+                }
+
+                if (img.complete && img.naturalHeight > 0) {
+                    return Promise.resolve();
+                }
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                    setTimeout(resolve, 3000); // 3s timeout
+                });
+            });
+
+            await Promise.all(imagePromises);
+            console.log('Images loaded');
+
+            // CRITICAL: Wait for browser to render
+            await new Promise(resolve => setTimeout(resolve, 500));
+            console.log('Starting capture...');
 
             // Capture certificate as high-quality image
             const canvas = await html2canvas(certificateElement, {
-                scale: 2, // High quality
-                useCORS: true, // Handle cross-origin images
-                allowTaint: true,
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
                 backgroundColor: '#FFFDF5',
-                width: 1122, // A4 landscape width in pixels at 96dpi
-                height: 794  // A4 landscape height in pixels at 96dpi
+                logging: true, // Debug mode
+                removeContainer: false
             });
+
+            console.log('Capture complete, canvas size:', canvas.width, 'x', canvas.height);
 
             // Hide certificate again
             certificateElement.style.position = 'absolute';
             certificateElement.style.left = '-9999px';
             certificateElement.style.opacity = '0';
+            certificateElement.style.visibility = 'hidden';
 
             // Create PDF (A4 landscape)
             const pdf = new jsPDF({
@@ -889,9 +918,13 @@ function CertificateVault({ soundOn, playSfx }) {
                 format: 'a4'
             });
 
+            // Get canvas dimensions
+            const imgWidth = 297; // A4 width in mm
+            const imgHeight = 210; // A4 height in mm
+
             // Add image to PDF
-            const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
 
             // Download PDF
             const fileName = `${certificateData.name.replace(/\s+/g, '_')}_Certificate.pdf`;
@@ -901,7 +934,15 @@ function CertificateVault({ soundOn, playSfx }) {
 
         } catch (error) {
             console.error('PDF generation error:', error);
-            alert('Error generating PDF. Please try again.');
+            alert('Error generating PDF: ' + error.message);
+
+            // Make sure to hide certificate on error
+            const cert = document.getElementById('print-certificate');
+            if (cert) {
+                cert.style.position = 'absolute';
+                cert.style.left = '-9999px';
+                cert.style.opacity = '0';
+            }
         }
     };
 
