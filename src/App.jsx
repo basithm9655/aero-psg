@@ -844,107 +844,80 @@ function CertificateVault({ soundOn, playSfx }) {
         }
     };
 
-    const handlePrint = async () => {
+    const handlePrint = () => {
         if (soundOn) playSfx('click');
 
-        try {
-            const html2canvas = (await import('html2canvas')).default;
-            const { jsPDF } = await import('jspdf');
+        // SIMPLEST BULLETPROOF METHOD: Show certificate, let browser print
+        const cert = document.getElementById('print-certificate');
+        if (!cert) {
+            alert('Certificate not found!');
+            return;
+        }
 
-            const cert = document.getElementById('print-certificate');
-            if (!cert) {
-                alert('Certificate not found!');
-                return;
-            }
+        // Show certificate in full-screen modal
+        cert.style.position = 'fixed';
+        cert.style.left = '50%';
+        cert.style.top = '50%';
+        cert.style.transform = 'translate(-50%, -50%)';
+        cert.style.opacity = '1';
+        cert.style.visibility = 'visible';
+        cert.style.zIndex = '999999';
+        cert.style.maxWidth = '90vw';
+        cert.style.maxHeight = '90vh';
+        cert.style.overflow = 'auto';
 
-            // SIMPLEST APPROACH: Show certificate visibly in overlay
-            cert.style.position = 'fixed';
-            cert.style.left = '50%';
-            cert.style.top = '50%';
-            cert.style.transform = 'translate(-50%, -50%) scale(0.5)'; // Scale down to fit screen
-            cert.style.opacity = '1';
-            cert.style.visibility = 'visible';
-            cert.style.zIndex = '999999';
-            cert.style.backgroundColor = 'white';
-
-            // Add dark overlay behind
-            const overlay = document.createElement('div');
-            overlay.id = 'cert-overlay';
-            overlay.style.cssText = `
+        // Dark overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'cert-modal-overlay';
+        overlay.innerHTML = `
+            <div style="
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(0,0,0,0.9);
+                background: rgba(0,0,0,0.95);
                 z-index: 999998;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-            `;
-            document.body.appendChild(overlay);
+                padding: 20px;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    display: flex;
+                    gap: 10px;
+                    z-index: 1000000;
+                ">
+                    <button onclick="window.print()" style="
+                        padding: 12px 24px;
+                        background: #00ff00;
+                        color: black;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        box-shadow: 0 4px 12px rgba(0,255,0,0.3);
+                    ">📄 PRINT TO PDF</button>
+                    <button onclick="document.getElementById('cert-modal-overlay').remove(); document.getElementById('print-certificate').style.position='absolute'; document.getElementById('print-certificate').style.left='-9999px'; document.getElementById('print-certificate').style.opacity='0';" style="
+                        padding: 12px 24px;
+                        background: #ff4444;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                    ">✕ Close</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
 
-            // Wait for images
-            const images = cert.querySelectorAll('img');
-            await Promise.all(Array.from(images).map(img => {
-                if (img.complete) return Promise.resolve();
-                return new Promise(resolve => {
-                    img.onload = resolve;
-                    img.onerror = resolve;
-                    setTimeout(resolve, 2000);
-                });
-            }));
-
-            // Small delay for rendering
-            await new Promise(r => setTimeout(r, 300));
-
-            console.log('Capturing visible certificate...');
-
-            // Capture at full scale
-            cert.style.transform = 'translate(-50%, -50%) scale(1)'; // Full size for capture
-            await new Promise(r => setTimeout(r, 100));
-
-            const canvas = await html2canvas(cert, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#FFFDF5'
-            });
-
-            console.log('Captured! Size:', canvas.width, 'x', canvas.height);
-
-            // Create PDF
-            const pdf = new jsPDF('landscape', 'mm', 'a4');
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-
-            // Download
-            pdf.save(`${certificateData.name.replace(/\s+/g, '_')}_Certificate.pdf`);
-
-            console.log('PDF downloaded!');
-
-            // Hide everything
-            cert.style.position = 'absolute';
-            cert.style.left = '-9999px';
-            cert.style.transform = '';
-            cert.style.opacity = '0';
-            cert.style.visibility = 'hidden';
-            overlay.remove();
-
-        } catch (error) {
-            console.error('PDF error:', error);
-            alert('PDF generation failed: ' + error.message);
-
-            // Cleanup on error
-            const cert = document.getElementById('print-certificate');
-            const overlay = document.getElementById('cert-overlay');
-            if (cert) {
-                cert.style.position = 'absolute';
-                cert.style.left = '-9999px';
-                cert.style.opacity = '0';
-            }
-            if (overlay) overlay.remove();
-        }
+        console.log('Certificate visible - click PRINT TO PDF button');
     };
 
     const reset = () => {
