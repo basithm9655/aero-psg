@@ -503,9 +503,12 @@
 
 .cert-sign-img {
     width: 110px;
-    height: auto;
+    height: 50px; /* Replaced 'auto' with a fixed height */
     margin-bottom: -8px;
     object-fit: contain;
     position: relative;
-    z-index: 21;   /* Ensure above watermark */
+    z-index: 21;
+    display: block; /* Ensures html2canvas processes it accurately */
+    margin-left: auto; /* Centers the image inside its container */
+    margin-right: auto;
 }
