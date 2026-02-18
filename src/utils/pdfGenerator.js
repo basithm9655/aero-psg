@@ -19,6 +19,7 @@ async function waitForImages(element) {
                 new Promise((resolve) => {
                     img.onload = resolve;
                     img.onerror = resolve; // Resolve even on error to not block
+                    // Force reload if src is set but not loaded
                     if (img.src && !img.complete) {
                         const src = img.src;
                         img.src = '';
@@ -30,41 +31,8 @@ async function waitForImages(element) {
     }
 
     await Promise.all(promises);
+    // Extra delay to ensure images are painted
     await new Promise(resolve => setTimeout(resolve, 200));
-}
-
-/**
- * NEW FIX: Converts image elements to Base64 data URIs.
- * This guarantees html2canvas will render them, bypassing any network/pathing issues.
- */
-function convertImagesToBase64(element) {
-    const images = element.getElementsByTagName('img');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    for (let img of images) {
-        if (img.src.startsWith('data:')) continue;
-
-        try {
-            canvas.width = img.naturalWidth || img.width || 300;
-            canvas.height = img.naturalHeight || img.height || 150;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            // Replace the src with raw base64 data
-            img.src = canvas.toDataURL('image/png');
-
-            // Strictly enforce dimensions on signatures so html2canvas doesn't collapse them
-            if (img.classList.contains('cert-sign-img')) {
-                img.style.width = '110px';
-                img.style.height = '50px';
-                img.style.display = 'block';
-            }
-        } catch (e) {
-            console.warn('Could not convert image to base64:', img.src, e);
-        }
-    }
 }
 
 /**
@@ -77,12 +45,18 @@ export async function generateCertificatePDF(elementId, filename) {
     let element = null;
 
     try {
+        // Dynamically import libraries
         const { default: jsPDF } = await import('jspdf');
         const { default: html2canvas } = await import('html2canvas');
 
+        // Get the certificate element
         element = document.getElementById(elementId);
-        if (!element) throw new Error('Certificate element not found');
+        if (!element) {
+            throw new Error('Certificate element not found');
+        }
 
+        // CRITICAL: Make element visible and properly positioned
+        // Save original styles
         const originalStyles = {
             display: element.style.display,
             position: element.style.position,
@@ -95,6 +69,7 @@ export async function generateCertificatePDF(elementId, filename) {
             height: element.style.height
         };
 
+        // Position element for capture - VISIBLE but off-screen
         element.style.display = 'block';
         element.style.position = 'fixed';
         element.style.left = '0';
@@ -103,32 +78,35 @@ export async function generateCertificatePDF(elementId, filename) {
         element.style.visibility = 'visible';
         element.style.zIndex = '999999';
         element.style.transform = 'none';
+
+        // Force exact A4 landscape dimensions (in pixels at 96 DPI)
+        // A4 landscape: 297mm x 210mm = 1122px x 794px at 96 DPI
         element.style.width = '1122px';
         element.style.height = '794px';
 
         // Wait for images to load
         await waitForImages(element);
 
-        // --- APPLY BASE64 FIX ---
-        convertImagesToBase64(element);
-
+        // Additional delay for full rendering
         await new Promise(resolve => setTimeout(resolve, 300));
 
         console.log('Starting PDF generation...');
 
+        // Capture with html2canvas - OPTIMIZED SETTINGS
         const canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#FFFDF5',
-            width: 1122,
-            height: 794,
+            scale: 2, // 2x scale for quality without huge file size
+            useCORS: true, // Enable cross-origin images
+            allowTaint: true, // Allow local images
+            backgroundColor: '#FFFDF5', // Certificate cream background
+            width: 1122, // A4 landscape width
+            height: 794, // A4 landscape height
             windowWidth: 1122,
             windowHeight: 794,
             logging: false,
             imageTimeout: 15000,
             removeContainer: false,
             onclone: (clonedDoc) => {
+                // Ensure cloned element maintains dimensions and visibility
                 const clonedElement = clonedDoc.getElementById(elementId);
                 if (clonedElement) {
                     clonedElement.style.display = 'block';
@@ -139,6 +117,7 @@ export async function generateCertificatePDF(elementId, filename) {
                     clonedElement.style.position = 'relative';
                     clonedElement.style.transform = 'none';
 
+                    // Remove any transforms from nested elements
                     const wrapper = clonedElement.querySelector('.certificate-wrapper');
                     if (wrapper) {
                         wrapper.style.transform = 'none';
@@ -146,20 +125,31 @@ export async function generateCertificatePDF(elementId, filename) {
                         wrapper.style.height = '794px';
                         wrapper.style.margin = '0';
                     }
+
+                    // Ensure ALL images (logos + signatures) are visible
+                    const imgs = clonedElement.querySelectorAll('img');
+                    imgs.forEach(img => {
+                        img.style.display = 'block';
+                        img.style.visibility = 'visible';
+                        img.style.opacity = '1';
+                    });
                 }
             }
         });
 
         console.log(`Canvas captured: ${canvas.width}x${canvas.height}`);
 
+        // Restore original styles
         Object.keys(originalStyles).forEach(key => {
             element.style[key] = originalStyles[key];
         });
 
+        // Verify canvas has content
         if (canvas.width === 0 || canvas.height === 0) {
             throw new Error('Canvas is empty - certificate did not render');
         }
 
+        // Create PDF with A4 landscape orientation
         const pdf = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
@@ -167,26 +157,58 @@ export async function generateCertificatePDF(elementId, filename) {
             compress: true,
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
-        pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+        // A4 landscape dimensions in mm
+        const pdfWidth = 297;
+        const pdfHeight = 210;
+
+        // Convert canvas to high-quality image
+        const imgData = canvas.toDataURL('image/png');
+
+        // Add image to PDF - FULL PAGE, no margins
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
 
         console.log('PDF created successfully');
+
+        // Download the PDF
         pdf.save(filename);
 
         return { success: true };
     } catch (error) {
         console.error('PDF generation error:', error);
+
+        // Restore element if error occurred
         if (element) {
             element.style.display = 'none';
             element.style.position = 'absolute';
             element.style.left = '-9999px';
+            element.style.top = '-9999px';
+            element.style.opacity = '0';
+            element.style.visibility = '';
+            element.style.zIndex = '';
+            element.style.transform = '';
+            element.style.width = '1122px';
+            element.style.height = '794px';
         }
+
         throw new Error(`Failed to generate PDF: ${error.message}`);
     }
 }
 
+/**
+ * Generate PDF filename from certificate data
+ * @param {Object} data - Certificate data
+ * @returns {string} Formatted filename
+ */
 export function generatePDFFilename(data) {
-    if (!data || !data.rollNo || !data.name) return 'Certificate.pdf';
-    const cleanName = data.name.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+    if (!data || !data.rollNo || !data.name) {
+        return 'Certificate.pdf';
+    }
+
+    // Clean the name (remove special characters, replace spaces with underscores)
+    const cleanName = data.name
+        .trim()
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .replace(/\s+/g, '_');
+
     return `Certificate_${data.rollNo}_${cleanName}.pdf`;
 }
