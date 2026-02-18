@@ -504,4 +504,6 @@
     height: auto;
     margin-bottom: -8px;
     object-fit: contain;
+    background: white;   /* ADD THIS */
+    padding: 3px;        /* ADD THIS */
 }
