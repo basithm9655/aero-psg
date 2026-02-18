@@ -814,14 +814,44 @@ function CertificateVault({ soundOn, playSfx }) {
                 return;
             }
 
+            // Wait for all images to load before capture
+            const images = certificateElement.getElementsByTagName('img');
+            const imagePromises = [];
+            for (let img of images) {
+                if (!img.complete) {
+                    imagePromises.push(new Promise((resolve) => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    }));
+                }
+            }
+            await Promise.all(imagePromises);
+            await new Promise(resolve => setTimeout(resolve, 300));
+
             // Capture the certificate as canvas with high quality
             const canvas = await html2canvas(certificateElement, {
-                scale: 2, // Higher quality
+                scale: 2,
                 useCORS: true,
                 allowTaint: true,
                 backgroundColor: '#FFFDF5',
-                width: 1122, // A4 landscape in pixels at 96 DPI
-                height: 794
+                width: 1122,
+                height: 794,
+                windowWidth: 1122,
+                windowHeight: 794,
+                logging: false,
+                imageTimeout: 15000,
+                onclone: (clonedDoc) => {
+                    const clonedEl = clonedDoc.getElementById('certificate-for-download');
+                    if (clonedEl) {
+                        // Ensure all images are visible in the clone
+                        const imgs = clonedEl.querySelectorAll('img');
+                        imgs.forEach(img => {
+                            img.style.display = 'block';
+                            img.style.visibility = 'visible';
+                            img.style.opacity = '1';
+                        });
+                    }
+                }
             });
 
             // Convert canvas to blob and download
@@ -1025,6 +1055,12 @@ function CertificateTemplate({ data, eventTitle = "AEROSPACE EVENT 2026" }) {
 
                 <div className="cert-footer">
                     <div className="cert-sig-box">
+                        <img
+                            src="/faculty-sign.png"
+                            alt="Faculty Signature"
+                            className="cert-sign-img"
+                            crossOrigin="anonymous"
+                        />
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-role">Faculty Advisor</div>
                         <div className="cert-sig-subtitle">Aerospace Association</div>
@@ -1034,6 +1070,12 @@ function CertificateTemplate({ data, eventTitle = "AEROSPACE EVENT 2026" }) {
                         <div className="cert-ribbon">EXCELLENCE</div>
                     </div>
                     <div className="cert-sig-box">
+                        <img
+                            src="/secretary-sign.png"
+                            alt="Secretary Signature"
+                            className="cert-sign-img"
+                            crossOrigin="anonymous"
+                        />
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-role">Chief Secretary</div>
                         <div className="cert-sig-subtitle">Aerospace Association</div>
