@@ -1,6 +1,10 @@
 import React from 'react';
 import '../certificate.css';
 
+// Import the signatures to ensure Vite processes them correctly for the canvas
+import facultySign from '/faculty-sign.png';
+import secretarySign from '/secretary-sign.png';
+
 /**
  * CertificateTemplate Component
  * Renders a premium certificate with student data
