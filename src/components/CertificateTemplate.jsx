@@ -9,11 +9,6 @@ import '../certificate.css';
 export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITLE" }) {
     if (!data) return null;
 
-    // Helper function to force absolute URLs for html2canvas
-    const getAbsoluteUrl = (path) => {
-        return `${window.location.origin}${path}`;
-    };
-
     // Determine certificate type
     const isParticipation =
         !data.place || data.place.toLowerCase().includes('participated');
@@ -34,7 +29,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
 
             {/* Watermark */}
             <img
-                src={getAbsoluteUrl("/collegelogo2.png")}
+                src="/collegelogo2.png"
                 className="cert-watermark"
                 alt="Watermark"
             />
@@ -53,7 +48,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                 {/* Header */}
                 <div className="cert-header">
                     <img
-                        src={getAbsoluteUrl("/collegelogo2.png")}
+                        src="/collegelogo2.png"
                         className="cert-logo"
                         alt="College Logo"
                     />
@@ -67,7 +62,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     </div>
 
                     <img
-                        src={getAbsoluteUrl("/logo-removebg-preview.png")}
+                        src="/logo-removebg-preview.png"
                         className="cert-logo"
                         alt="Association Logo"
                     />
@@ -112,10 +107,19 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
 
                     {/* Faculty Signature */}
                     <div className="cert-sig-box">
-                        <img
-                            src={getAbsoluteUrl("/faculty-sign.png")}
-                            alt="Faculty Signature"
-                            className="cert-sign-img"
+                        {/* Using CSS background-image to bypass html2canvas img bugs */}
+                        <div 
+                            style={{
+                                backgroundImage: 'url("/faculty-sign.png")',
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center bottom',
+                                backgroundRepeat: 'no-repeat',
+                                width: '110px',
+                                height: '50px',
+                                margin: '0 auto -8px auto',
+                                position: 'relative',
+                                zIndex: 21
+                            }}
                         />
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-role">Faculty Advisor</div>
@@ -132,10 +136,19 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
 
                     {/* Secretary Signature */}
                     <div className="cert-sig-box">
-                        <img
-                            src={getAbsoluteUrl("/secretary-sign.png")}
-                            alt="Secretary Signature"
-                            className="cert-sign-img"
+                        {/* Using CSS background-image to bypass html2canvas img bugs */}
+                        <div 
+                            style={{
+                                backgroundImage: 'url("/secretary-sign.png")',
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center bottom',
+                                backgroundRepeat: 'no-repeat',
+                                width: '110px',
+                                height: '50px',
+                                margin: '0 auto -8px auto',
+                                position: 'relative',
+                                zIndex: 21
+                            }}
                         />
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-role">Chief Secretary</div>
