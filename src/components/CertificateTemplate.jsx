@@ -112,7 +112,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     {/* Faculty Signature */}
                     <div className="cert-sig-box">
                         <img
-                            src="/faculty-sign.png"
+                            src={facultySign}
                             alt="Faculty Signature"
                             className="cert-sign-img"
                         />
@@ -132,7 +132,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     {/* Secretary Signature */}
                     <div className="cert-sig-box">
                         <img
-                            src="/secretary-sign.png"
+                            src={secretarySign}
                             alt="Secretary Signature"
                             className="cert-sign-img"
                         />
