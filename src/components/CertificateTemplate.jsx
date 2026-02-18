@@ -27,13 +27,6 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
     return (
         <div className="certificate-wrapper">
 
-            {/* Watermark */}
-            <img
-                src="/collegelogo2.png"
-                className="cert-watermark"
-                alt="Watermark"
-            />
-
             {/* Frame */}
             <div className="cert-frame"></div>
 
