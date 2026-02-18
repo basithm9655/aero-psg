@@ -1,10 +1,6 @@
 import React from 'react';
 import '../certificate.css';
 
-// Import the signatures to ensure Vite processes them correctly for the canvas
-import facultySign from '/faculty-sign.png';
-import secretarySign from '/secretary-sign.png';
-
 /**
  * CertificateTemplate Component
  * Renders a premium certificate with student data
@@ -12,6 +8,11 @@ import secretarySign from '/secretary-sign.png';
  */
 export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITLE" }) {
     if (!data) return null;
+
+    // Helper function to force absolute URLs for html2canvas
+    const getAbsoluteUrl = (path) => {
+        return `${window.location.origin}${path}`;
+    };
 
     // Determine certificate type
     const isParticipation =
@@ -33,7 +34,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
 
             {/* Watermark */}
             <img
-                src="/collegelogo2.png"
+                src={getAbsoluteUrl("/collegelogo2.png")}
                 className="cert-watermark"
                 alt="Watermark"
             />
@@ -52,7 +53,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                 {/* Header */}
                 <div className="cert-header">
                     <img
-                        src="/collegelogo2.png"
+                        src={getAbsoluteUrl("/collegelogo2.png")}
                         className="cert-logo"
                         alt="College Logo"
                     />
@@ -66,7 +67,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     </div>
 
                     <img
-                        src="/logo-removebg-preview.png"
+                        src={getAbsoluteUrl("/logo-removebg-preview.png")}
                         className="cert-logo"
                         alt="Association Logo"
                     />
@@ -112,7 +113,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     {/* Faculty Signature */}
                     <div className="cert-sig-box">
                         <img
-                            src={facultySign}
+                            src={getAbsoluteUrl("/faculty-sign.png")}
                             alt="Faculty Signature"
                             className="cert-sign-img"
                         />
@@ -132,7 +133,7 @@ export default function CertificateTemplate({ data, eventTitle = "XYZ EVENT TITL
                     {/* Secretary Signature */}
                     <div className="cert-sig-box">
                         <img
-                            src={secretarySign}
+                            src={getAbsoluteUrl("/secretary-sign.png")}
                             alt="Secretary Signature"
                             className="cert-sign-img"
                         />
