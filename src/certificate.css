@@ -498,3 +498,10 @@
         margin-bottom: -440px;
     }
 }
+
+.cert-sign-img {
+    width: 110px;
+    height: auto;
+    margin-bottom: -8px;
+    object-fit: contain;
+}
