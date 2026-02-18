@@ -313,6 +313,8 @@
 .cert-sig-box {
     text-align: center;
     width: 165px;
+    position: relative;
+    z-index: 20;   /* IMPORTANT FIX */
 }
 
 .cert-sig-line {
