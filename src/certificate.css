@@ -511,4 +511,7 @@
     display: block; /* Ensures html2canvas processes it accurately */
     margin-left: auto; /* Centers the image inside its container */
     margin-right: auto;
+    max-width: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
 }
