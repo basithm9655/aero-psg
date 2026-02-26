@@ -23,8 +23,8 @@ export const EVENTS_DATA = [
         eventDate: new Date('2026-03-02T09:00:00'), // Prelims start
 
         // VENUE DETAILS
-        venue: "G-Block, Room 301",
-        hall: "Room 301",
+        venue: "G-Block, Room 401",
+        hall: "Room 401",
         building: "G-Block",
 
         // DESCRIPTIONS
@@ -37,7 +37,7 @@ export const EVENTS_DATA = [
 
         // ADDITIONAL INFO
         tagline: "Where Curiosity Takes Flight",
-        rounds: "Prelims: 17/02/2026 (Virtual) | Finals: 18/02/2026 (Offline)",
+        rounds: MCQ | Finals: Group Discussion and Interview ",
         contact: "Rahil - 7305457530 | Vasim - 6379737578",
         instagram: "@aero_psg_tech",
 
