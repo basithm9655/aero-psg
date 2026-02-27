@@ -28,7 +28,7 @@ export const EVENTS_DATA = [
         building: "G-Block",
 
         // DESCRIPTIONS
-        details: "AeroQuest - Where Curiosity Takes Flight. Two-day aerospace competition with virtual prelims (Feb 17) and offline finals (Feb 18, 2026). Test your aerospace knowledge!",
+        details: "AeroQuest - Where Curiosity Takes Flight. Two-day aerospace competition with MCQ Screening and GD (MAR 02) and Interview (MAR 03, 2026). Test your aerospace knowledge!",
 
         // REGISTRATION
         registrationLink: "https://forms.gle/your-link", // Your Google Form link
