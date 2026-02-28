@@ -37,7 +37,7 @@ export const EVENTS_DATA = [
 
         // ADDITIONAL INFO
         tagline: "Where Curiosity Takes Flight",
-        rounds: MCQ | Finals: Group Discussion and Interview ",
+        rounds: "MCQ | Finals: Group Discussion and Interview ",
         contact: "Rahil - 7305457530 | Vasim - 6379737578",
         instagram: "@aero_psg_tech",
 
