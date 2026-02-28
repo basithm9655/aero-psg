@@ -3,7 +3,7 @@
  * Handles fetching certificate data from Google Apps Script endpoint
  */
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAkDBvojbxbRul99ETqa_7nk3Z9K8szZo_YLVMXIjcr-AoP-rQO3DAEtzcXfFiZa_g/exec';
 
 /**
  * Fetch certificate data for a given roll number
