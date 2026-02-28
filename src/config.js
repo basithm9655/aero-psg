@@ -57,7 +57,7 @@ export const CONFIG = {
 
     // Certificate Generator API
     certificate: {
-        apiUrl: "https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec",
+        apiUrl: "https://script.google.com/macros/s/AKfycbxAkDBvojbxbRul99ETqa_7nk3Z9K8szZo_YLVMXIjcr-AoP-rQO3DAEtzcXfFiZa_g/exec",
         enabled: true,
     },
 
