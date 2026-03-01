@@ -20,7 +20,7 @@ export const EVENTS_DATA = [
         // EVENT TIMING
         date: "MAR 02, 2026",
         time: "Full Day Event",
-        eventDate: new Date('2026-03-02T09:00:00'), // Prelims start
+        eventDate: new Date('2026-03-03T09:00:00'), // Prelims start
 
         // VENUE DETAILS
         venue: "G-Block, Room 401",
