@@ -217,6 +217,33 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .btn-action-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-retest {
+            background: linear-gradient(135deg, #1976d2, #0d47a1);
+            color: white;
+            margin-right: 15px;
+        }
+
+        .btn-retest:hover {
+            background: linear-gradient(135deg, #2196f3, #1565c0);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+        }
+
         .btn-refresh {
             background: rgba(255, 255, 255, 0.15);
             color: #fff;
@@ -796,6 +823,11 @@
                             <option value="3" ${place === '3' ? 'selected' : ''}>🥉 3rd Place</option>
                         </select>
 
+                        <!-- Retest Button -->
+                        <button class="btn-action-small btn-retest" onclick="allowRetest('${student.rollNo}', this)">
+                            🔄 Retest
+                        </button>
+
                         <!-- Attendance Toggle -->
                         <label class="switch">
                             <input type="checkbox" ${isPresent ? 'checked' : ''} onchange="updateRecord('${student.rollNo}', 'attendance', this.checked ? '1' : '', this)">
@@ -814,6 +846,35 @@
             if (val === '2') return 'rank-2';
             if (val === '3') return 'rank-3';
             return '';
+        }
+
+        async function allowRetest(rollNo, btn) {
+            if (!confirm(`Allow retest for ${rollNo}? This will clear their MCQ score.`)) return;
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳...';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'retest', rollNo: rollNo })
+                });
+
+                const respText = await response.text();
+                console.log("Server response:", respText);
+
+                showToast("Retest allowed ✓");
+                btn.innerHTML = '✅ OK';
+                btn.style.background = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 3000);
+            } catch (error) {
+                console.error("Retest failed", error);
+                showToast("Error executing retest!", true);
+                btn.innerHTML = originalText;
+            }
         }
 
         // Optimistic UI Update with Debounce/Queue could be better, but simple direct call for now.
@@ -903,7 +964,7 @@
         // --- Security Logic ---
         function verifyAdmin() {
             const pass = document.getElementById('adminPass').value;
-            if (pass === '9182') {
+            if (pass === '6379') {
                 document.getElementById('loginModal').style.display = 'none';
                 fetchStudents(); // Load data only after login
             } else {
@@ -929,7 +990,7 @@
 
         async function confirmDelete() {
             const pass = document.getElementById('deletePass').value;
-            if (pass === '2819') {
+            if (pass === '6379') {
                 // Execute Delete
                 document.getElementById('deleteModal').innerHTML = '<div class="modal"><h3>Deleting...</h3><div class="spinner"></div></div>';
 
