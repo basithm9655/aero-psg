@@ -3,966 +3,1711 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Event Attendance</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#03060f">
+    <title>DSDAEA // Mission Control Admin Console</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #002855;
-            --secondary: #c5a059;
-            --bg: #f4f7f6;
-            --surface: #ffffff;
-            --text: #333;
-            --text-light: #777;
-            --success: #2e7d32;
-            --danger: #d32f2f;
+            --bg-base: #03060f;
+            --bg-surface: rgba(10, 18, 35, 0.75);
+            --bg-card: rgba(15, 23, 42, 0.8);
+            --cyan: #00f0ff;
+            --cyan-glow: rgba(0, 240, 255, 0.35);
+            --cyan-subtle: rgba(0, 240, 255, 0.1);
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border-tech: rgba(0, 240, 255, 0.2);
+            --border-hover: rgba(0, 240, 255, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            color: var(--text);
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Navbar */
-        .navbar {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px 20px;
+        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+        .font-display { font-family: 'Orbitron', sans-serif; }
+
+        /* Navbar Header */
+        .header {
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-tech);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 12px 24px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            gap: 16px;
         }
 
-        .navbar h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            height: 38px;
+            width: auto;
+            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
+        }
+
+        .brand-text h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .brand-text p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
             letter-spacing: 1px;
+            color: var(--cyan);
         }
 
-        .navbar .brand {
+        .header-status {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .navbar img {
-            height: 35px;
-            width: auto;
-        }
-
-        /* Container */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Stats & Search */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-around;
+        .status-pill {
+            display: inline-flex;
             align-items: center;
-            text-align: center;
-        }
-
-        .stat-item h3 {
-            margin: 0;
-            font-size: 24px;
-            color: var(--primary);
-        }
-
-        .stat-item p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-light);
-            text-transform: uppercase;
-        }
-
-        .search-box {
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 40, 85, 0.15);
-        }
-
-        /* Student List */
-        .student-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* List Animation */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .student-card {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 18px 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-            border: 1px solid #eee;
-            border-left: 5px solid transparent;
-            transition: all 0.2s ease;
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        /* Avatar */
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #eee;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            margin-right: 15px;
-            flex-shrink: 0;
-            text-transform: uppercase;
-        }
-
-        .student-card.present {
-            border-left-color: var(--success);
-            background: #f0fdf4;
-            /* Lighter Green */
-            border-color: #dcfce7;
-        }
-
-        .student-flex-group {
-            display: flex;
-            align-items: center;
-            flex: 1;
-        }
-
-        .student-name {
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 4px;
-            color: var(--primary);
-        }
-
-        /* Action Buttons */
-        .btn-action {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 50px;
-            /* Pill shape */
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            margin-left: 10px;
-            text-transform: uppercase;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
             letter-spacing: 0.5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--border-tech);
+            color: var(--cyan);
         }
 
-        .btn-refresh {
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
+        .status-pill.online {
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.1);
         }
 
-        .btn-refresh:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        .status-pill.offline {
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.1);
         }
 
-        .btn-delete {
-            background: linear-gradient(135deg, #d32f2f, #b71c1c);
-            color: white;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 8px currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .btn-tech {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            border: 1px solid var(--border-tech);
+            background: var(--cyan-subtle);
+            color: var(--cyan);
+        }
+
+        .btn-tech:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--cyan-glow);
+        }
+
+        .btn-primary {
+            background: var(--cyan);
+            color: #000;
+            font-weight: 700;
             border: none;
         }
 
-        .btn-delete:hover {
-            background: linear-gradient(135deg, #e53935, #c62828);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(211, 47, 47, 0.3);
+        .btn-primary:hover {
+            background: #ffffff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
         }
 
-        .btn-action:active {
-            transform: scale(0.95);
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
         }
 
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: rgba(0, 40, 85, 0.95);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 50px;
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* App Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px 80px;
+        }
+
+        /* Navigation Tabs Bar */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(10, 18, 35, 0.6);
+            backdrop-filter: blur(12px);
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border-tech);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 1px;
+            padding: 10px 18px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Tab Content Panels */
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.25s ease forwards;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grid System */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* HUD Card Box */
+        .hud-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-tech);
+            border-radius: 10px;
+            padding: 24px;
+            position: relative;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .hud-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+            padding-bottom: 12px;
+        }
+
+        .card-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header .subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--cyan);
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            color: var(--cyan);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(3, 7, 18, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 6px;
+            color: #ffffff;
+            font-family: 'Rajdhani', sans-serif;
             font-size: 15px;
-            font-weight: 500;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+            background: rgba(3, 7, 18, 0.95);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        /* Photo Upload Dropzone */
+        .photo-uploader {
+            border: 2px dashed rgba(0, 240, 255, 0.35);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 240, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .photo-uploader:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .photo-uploader input[type="file"] {
+            position: absolute;
+            inset: 0;
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-            z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-box {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-tech);
+            margin-top: 12px;
+            max-height: 220px;
+            display: none;
+        }
+
+        .preview-box img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .preset-photos {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .preset-thumb {
+            width: 64px;
+            height: 44px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .preset-thumb:hover, .preset-thumb.active {
+            border-color: var(--cyan);
+            transform: scale(1.05);
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        .preset-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Live Preview Card */
+        .live-preview-card {
+            background: #000;
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .live-preview-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            background: #0a0f1d;
+        }
+
+        .live-preview-body {
+            padding: 16px;
+        }
+
+        /* Stats Bar */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-hud {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-hud h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .stat-hud p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .stat-hud .icon {
+            font-size: 28px;
+            opacity: 0.8;
+        }
+
+        /* Search & Controls */
+        .search-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .search-row .form-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* Student Roster Cards */
+        .cadet-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cadet-card {
+            background: rgba(10, 18, 35, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            border-left: 4px solid #334155;
+            border-radius: 8px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .cadet-card:hover {
+            border-color: var(--border-hover);
+            transform: translateX(2px);
+        }
+
+        .cadet-card.present {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .cadet-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--border-tech);
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .cadet-info {
+            flex: 1;
+        }
+
+        .cadet-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .cadet-meta {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cadet-roll-badge {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--cyan);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .cadet-actions {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .student-card.present {
-            border-left-color: var(--success);
-            background: #f8fff9;
-        }
-
-        .student-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .student-info {
-            flex: 1;
-        }
-
-        .student-name {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 4px;
-            color: var(--primary);
-        }
-
-        .student-meta {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-
-        .roll-badge {
-            background: #eee;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
+        .select-place {
+            background: rgba(3, 7, 18, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            color: #ffffff;
+            font-family: 'Share Tech Mono', monospace;
             font-size: 12px;
-            margin-right: 8px;
-            color: #555;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            outline: none;
         }
 
-        /* Actions */
-        .actions {
-            display: flex;
+        .select-place.rank-1 { border-color: #fbbf24; color: #fbbf24; font-weight: bold; }
+        .select-place.rank-2 { border-color: #94a3b8; color: #e2e8f0; font-weight: bold; }
+        .select-place.rank-3 { border-color: #cd7f32; color: #f97316; font-weight: bold; }
+
+        /* Certificate Status Badges */
+        .cert-status-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-flex;
             align-items: center;
-            gap: 15px;
+            gap: 4px;
+            font-weight: 700;
+        }
+        .cert-status-badge.absent {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .cert-status-badge.participant {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .cert-status-badge.rank-1 {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+        }
+        .cert-status-badge.rank-2 {
+            background: rgba(148, 163, 184, 0.15);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+        }
+        .cert-status-badge.rank-3 {
+            background: rgba(249, 115, 22, 0.15);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, 0.4);
         }
 
-        /* Toggle Switch */
+        /* Filter Pills Bar */
+        .roster-filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            background: rgba(10, 18, 35, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: var(--text-dim);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-pill:hover, .filter-pill.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--cyan);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+        }
+
+        /* Modern Switch */
         .switch {
             position: relative;
             display: inline-block;
-            width: 50px;
-            height: 28px;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
+            inset: 0;
+            background-color: #334155;
+            transition: .3s;
             border-radius: 34px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
-            transition: .4s;
+            transition: .3s;
             border-radius: 50%;
         }
 
-        input:checked+.slider {
-            background-color: var(--success);
+        input:checked + .slider {
+            background-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
-        input:focus+.slider {
-            box-shadow: 0 0 1px var(--success);
+        input:checked + .slider:before {
+            transform: translateX(20px);
         }
 
-        input:checked+.slider:before {
-            transform: translateX(22px);
+        /* Content Catalog Cards */
+        .content-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
         }
 
-        /* Place Select */
-        .place-select {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-family: inherit;
-            font-size: 14px;
-            color: var(--text);
-            background: white;
-            cursor: pointer;
-            min-width: 130px;
+        .content-item-card {
+            background: rgba(10, 18, 35, 0.8);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .place-select:focus {
-            outline: none;
-            border-color: var(--secondary);
+        .content-item-thumb {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
         }
 
-        .place-select.rank-1 {
-            border-color: #ffd700;
-            background: #fffdf0;
-            color: #b8860b;
-            font-weight: bold;
+        .content-item-content {
+            padding: 14px;
+            flex: 1;
         }
 
-        .place-select.rank-2 {
-            border-color: #c0c0c0;
-            background: #fdfdfd;
-            color: #757575;
-            font-weight: bold;
-        }
-
-        .place-select.rank-3 {
-            border-color: #cd7f32;
-            background: #fff5ee;
-            color: #a0522d;
-            font-weight: bold;
-        }
-
-        /* Loading */
-        #loader {
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: var(--text-light);
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--secondary);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Toast */
+        /* Toast Notifications */
         .toast {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(3, 7, 18, 0.95);
+            border: 1px solid var(--cyan);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            box-shadow: 0 0 20px var(--cyan-glow);
+            transform: translateY(100px);
             opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .toast.show {
+            transform: translateY(0);
             opacity: 1;
         }
 
-        /* Modal */
+        /* Passcode Security Gate Modal */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 9999;
+            padding: 20px;
         }
 
-        .modal {
-            background: white;
-            padding: 25px;
+        .auth-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--cyan);
+            box-shadow: 0 0 35px var(--cyan-glow);
             border-radius: 12px;
-            width: 90%;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal h2 {
-            margin-top: 0;
-            font-size: 20px;
-            color: var(--primary);
-        }
-
-        .modal input {
+            padding: 32px;
+            max-width: 380px;
             width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        .modal button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            .navbar {
-                padding: 10px 15px;
-            }
-
-            .navbar h1 {
-                display: none;
-                /* Hide title on mobile to make space */
-            }
-
-            .navbar .brand {
-                gap: 5px;
-            }
-
-            /* Icon-only buttons on mobile */
-            .btn-action {
-                padding: 8px;
-                border-radius: 50%;
-                /* Circle */
-                width: 36px;
-                height: 36px;
-                justify-content: center;
-                margin-left: 5px;
-            }
-
-            .btn-action span {
-                font-size: 18px !important;
-                /* Bigger icon */
-                margin: 0;
-            }
-
-            /* Hide text in buttons */
-            .btn-action {
-                font-size: 0;
-            }
-
-            .navbar img {
-                height: 28px;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .controls {
-                gap: 10px;
-                margin-bottom: 15px;
-            }
-
-            .stat-card {
-                padding: 10px;
-            }
-
-            .stat-item h3 {
-                font-size: 18px;
-            }
-
-            .stat-item p {
-                font-size: 10px;
-            }
-
-            .search-box input {
-                padding: 12px 35px 12px 15px;
-                /* Space for X icon */
-                font-size: 14px;
-            }
-
-            .student-card {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 15px;
-            }
-
-            .student-info {
-                width: 100%;
-                border-bottom: 1px solid #eee;
-                padding-bottom: 10px;
-                margin-bottom: 5px;
-            }
-
-            .student-flex-group {
-                width: 100%;
-            }
-
-            .actions {
-                width: 100%;
-                justify-content: space-between;
-                gap: 10px;
-            }
-
-            .place-select {
-                flex: 1;
-                font-size: 13px;
-                min-width: 0;
-            }
-        }
-
-        /* Empty State */
-        .empty-state {
             text-align: center;
-            padding: 40px;
-            color: var(--text-light);
         }
 
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-            display: block;
-        }
-
-        /* Clear Search Button */
-        .clear-search {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #999;
-            font-size: 18px;
-            display: none;
+        @media (max-width: 640px) {
+            .header { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+            .brand-text h1 { font-size: 12px; }
+            .brand-text p { display: none; }
+            .status-pill { display: inline-flex; font-size: 8.5px; padding: 2px 7px; letter-spacing: 0.05em; }
+            .nav-tabs { padding: 3px; gap: 4px; }
+            .tab-btn { font-size: 10px; padding: 7px 10px; flex: 1; text-align: center; justify-content: center; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
+            .stat-card { padding: 10px 8px; text-align: center; }
+            .stat-value { font-size: 18px; }
+            .stat-label { font-size: 8px; letter-spacing: 0.05em; }
+            .hud-card { padding: 14px; }
+            .search-row { flex-direction: column; gap: 8px; }
+            .search-row .form-input { width: 100%; min-width: 0; }
+            .search-row .btn-tech { width: 100%; justify-content: center; }
+            .roster-filter-bar { gap: 4px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+            .filter-pill { font-size: 9.5px; padding: 3px 8px; white-space: nowrap; flex-shrink: 0; }
+            .cadet-card { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px; }
+            .cadet-actions { width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; flex-wrap: wrap; gap: 6px; }
+            .select-place { font-size: 10px; padding: 5px 6px; flex: 1; min-width: 100px; }
+            .modal-box { padding: 18px 14px; width: 95%; max-height: 90vh; }
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar">
-        <div class="brand">
-            <img src="collegelogo2.png" alt="Logo">
-            <h1>Admin Panel</h1>
-            <button class="btn-action btn-refresh" onclick="fetchStudents()">
-                <span style="font-size: 16px;">🔄</span> Refresh
+    <!-- SECURITY PASSCODE GATE -->
+    <div id="authGate" class="modal-overlay">
+        <div class="auth-box">
+            <img src="/logo.png" alt="DSDAEA" style="width: 56px; height: 56px; margin: 0 auto 16px; display: block; filter: drop-shadow(0 0 10px rgba(0,240,255,0.6));">
+            <h2 class="font-display" style="font-size: 18px; margin-bottom: 6px; color: #fff;">SECURITY CLEARANCE</h2>
+            <p class="font-mono-tech" style="font-size: 11px; color: var(--cyan); margin-bottom: 20px;">MISSION CONTROL AUTHENTICATION</p>
+            
+            <input type="password" id="passcodeField" class="form-input font-mono-tech" placeholder="ENTER ACCESS KEY" style="text-align: center; font-size: 16px; margin-bottom: 14px;" onkeypress="if(event.key==='Enter') verifyAccess()">
+            
+            <button class="btn-tech btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 13px;" onclick="verifyAccess()">
+                ACCESS CONSOLE ⚡
             </button>
-            <button class="btn-action btn-delete" onclick="promptDelete()">
-                <span style="font-size: 16px;">🗑️</span> Delete All
+            <p id="authError" class="font-mono-tech" style="color: var(--danger); font-size: 11px; margin-top: 12px; display: none;">ACCESS DENIED // INVALID CLEARANCE</p>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR -->
+    <header class="header">
+        <div class="brand-group">
+            <img src="/logo.png" alt="DSDAEA" class="brand-logo">
+            <div class="brand-text">
+                <h1>DSDAEA // MISSION CONTROL</h1>
+                <p>AEROSPACE CLOUD & CONTENT STUDIO</p>
+            </div>
+        </div>
+
+        <div class="header-status">
+            <div id="connectionStatus" class="status-pill offline">
+                <span class="status-dot"></span>
+                <span id="connectionStatusText">LOCAL CACHE READY</span>
+            </div>
+            <a href="/" target="_blank" class="btn-tech" title="Open Main Website">
+                <span>VIEW SITE</span> ↗
+            </a>
+            <button class="btn-tech btn-danger" onclick="lockConsole()" title="Lock Console">
+                LOCK 🔒
             </button>
         </div>
-        <img src="logo-removebg-preview.png" alt="Association Logo" style="height: 40px; width: auto;">
-    </nav>
+    </header>
 
+    <!-- CONTENT CONTAINER -->
     <div class="container">
 
-        <div class="controls">
-            <div class="stat-card">
-                <div class="stat-item">
-                    <h3 id="countTotal">0</h3>
-                    <p>Total</p>
+        <!-- TABS CONTROLLER -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('contentTab', this)">
+                📸 CONTENT & PHOTO STUDIO
+            </button>
+            <button class="tab-btn" onclick="switchTab('cadetsTab', this)">
+                👥 CADET ATTENDANCE & ROSTER
+            </button>
+        </nav>
+
+        <!-- ====================================================================
+             TAB 1: CONTENT & PHOTO STUDIO (Add Content with Photos)
+             ==================================================================== -->
+        <div id="contentTab" class="tab-pane active">
+            <div class="grid-2">
+                
+                <!-- Left: Form to Add / Publish Content with Photo -->
+                <div class="hud-card">
+                    <div class="card-header">
+                        <div>
+                            <h2><span>🚀</span> PUBLISH NEW MISSION / DISPATCH</h2>
+                            <span class="subtitle">PUBLISH LIVE CONTENT WITH PHOTOS TO THE MAIN PORTAL</span>
+                        </div>
+                    </div>
+
+                    <form id="contentForm" onsubmit="handlePublishContent(event)">
+                        <div class="form-group">
+                            <label class="form-label">TITLE / MISSION CODENAME</label>
+                            <input type="text" id="postTitle" class="form-input" placeholder="E.g. Autonomous Drone Racing Workshop" required oninput="updateLivePreview()">
+                        </div>
+
+                        <div class="grid-2" style="gap: 12px;">
+                            <div class="form-group">
+                                <label class="form-label">CATEGORY</label>
+                                <select id="postCategory" class="form-select" onchange="updateLivePreview()">
+                                    <option value="competition">Competition / Hackathon</option>
+                                    <option value="workshop">Technical Workshop</option>
+                                    <option value="seminar">Masterclass / Seminar</option>
+                                    <option value="dispatch">News / Flight Dispatch</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">BADGE / CLEARANCE</label>
+                                <input type="text" id="postBadge" class="form-input" placeholder="E.g. HANDS-ON LAB" oninput="updateLivePreview()">
+                            </div>
+                        </div>
+
+                        <div class="grid-2" style="gap: 12px;">
+                            <div class="form-group">
+                                <label class="form-label">DATE & SCHEDULE</label>
+                                <input type="text" id="postDate" class="form-input" placeholder="E.g. MARCH 28-29, 2026" oninput="updateLivePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">VENUE / LOCATION</label>
+                                <input type="text" id="postLocation" class="form-input" placeholder="E.g. Block 5 Aero Lab" oninput="updateLivePreview()">
+                            </div>
+                        </div>
+
+                        <div class="grid-2" style="gap: 12px;">
+                            <div class="form-group">
+                                <label class="form-label">TIME / DURATION</label>
+                                <input type="text" id="postTime" class="form-input" placeholder="E.g. 09:00 AM - 05:30 PM IST" oninput="updateLivePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">PRIZES / AWARDS</label>
+                                <input type="text" id="postPrizes" class="form-input" placeholder="E.g. ₹50,000 Cash Pool + Trophies" oninput="updateLivePreview()">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="padding: 12px; background: rgba(0,240,255,0.06); border: 1px dashed rgba(0,240,255,0.3); border-radius: 6px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="postIsLive" style="width: 18px; height: 18px; accent-color: var(--cyan);" onchange="updateLivePreview()">
+                                <div>
+                                    <span class="font-mono-tech" style="font-size: 12px; color: #fff; font-weight: bold;">SET AS HERO FLAGSHIP EVENT</span>
+                                    <p style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">If checked, this event will be featured directly in the Hero Section with the 3D Orbiter HUD, countdown timer, and primary cadet registration.</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">MISSION SUMMARY & SPECIFICATIONS</label>
+                            <textarea id="postSummary" class="form-textarea" placeholder="Detail the technical agenda, prerequisites, flight objectives..." required oninput="updateLivePreview()"></textarea>
+                        </div>
+
+                        <!-- PHOTO SELECTION SECTION -->
+                        <div class="form-group">
+                            <label class="form-label">MISSION PHOTO / COVER ART</label>
+                            
+                            <!-- File Upload Area -->
+                            <div class="photo-uploader" id="dropArea">
+                                <input type="file" id="photoFileInput" accept="image/*" onchange="handleFileSelected(event)">
+                                <div style="font-size: 24px; margin-bottom: 6px;">📷</div>
+                                <p class="font-mono-tech" style="font-size: 12px; color: var(--cyan);">DRAG & DROP IMAGE OR CLICK TO BROWSE</p>
+                                <p style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Automatically optimized & saved for high-speed delivery</p>
+                            </div>
+
+                            <!-- Or Direct Image URL -->
+                            <div style="margin-top: 10px;">
+                                <input type="url" id="photoUrlInput" class="form-input" placeholder="Or enter direct photo URL (Unsplash, Cloudinary...)" oninput="handleUrlImage(this.value)">
+                            </div>
+
+                            <!-- Preset Curated Photos -->
+                            <div style="margin-top: 10px;">
+                                <span class="font-mono-tech" style="font-size: 10px; color: var(--text-dim);">PRESET AEROSPACE ART:</span>
+                                <div class="preset-photos">
+                                    <div class="preset-thumb active" onclick="pickPreset('https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800')">
+                                        <img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=150" alt="Preset 1">
+                                    </div>
+                                    <div class="preset-thumb" onclick="pickPreset('https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?auto=format&fit=crop&q=80&w=800')">
+                                        <img src="https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?auto=format&fit=crop&q=80&w=150" alt="Preset 2">
+                                    </div>
+                                    <div class="preset-thumb" onclick="pickPreset('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800')">
+                                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=150" alt="Preset 3">
+                                    </div>
+                                    <div class="preset-thumb" onclick="pickPreset('https://images.unsplash.com/photo-1614728853913-1e32005e307b?auto=format&fit=crop&q=80&w=800')">
+                                        <img src="https://images.unsplash.com/photo-1614728853913-1e32005e307b?auto=format&fit=crop&q=80&w=150" alt="Preset 4">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preview of Selected Image -->
+                            <div class="preview-box" id="previewBox" style="display: block;">
+                                <img id="previewImage" src="https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800" alt="Cover Preview">
+                                <button type="button" class="preview-remove-btn" onclick="clearPhoto()">RESET PHOTO</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-tech btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 13px; margin-top: 10px;">
+                            🚀 PUBLISH MISSION WITH PHOTO
+                        </button>
+                    </form>
                 </div>
-                <div class="stat-item">
-                    <h3 id="countPresent">0</h3>
-                    <p>Present</p>
+
+                <!-- Right: Live Card Preview & Existing Published Catalog -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- Real-time Holographic Preview -->
+                    <div class="hud-card">
+                        <div class="card-header">
+                            <div>
+                                <h2><span>👁️</span> LIVE INTERFACE PREVIEW</h2>
+                                <span class="subtitle">REAL-TIME DISPLAY AS CADETS WILL SEE IT ON THE HOME PAGE</span>
+                            </div>
+                        </div>
+
+                        <div class="live-preview-card">
+                            <img id="liveCardImg" class="live-preview-img" src="/flight-propulsion-blueprint.jpeg" alt="Live Card">
+                            <div class="live-preview-body">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span id="liveCardBadge" class="font-mono-tech" style="font-size: 10px; color: var(--cyan); padding: 2px 6px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.3); border-radius: 4px;">
+                                        FLAGSHIP WORKSHOP
+                                    </span>
+                                    <span id="liveCardDate" class="font-mono-tech" style="font-size: 11px; color: var(--text-dim);">SEPTEMBER 25, 2026 • 04:30 PM - 06:30 PM</span>
+                                </div>
+                                <h3 id="liveCardTitle" class="font-display" style="font-size: 16px; color: #fff; margin-bottom: 6px;">FLIGHT & PROPULSION SYSTEMS</h3>
+                                <p id="liveCardSummary" style="font-size: 12px; color: #94a3b8; line-height: 1.4; margin-bottom: 12px;">
+                                    History of Planes, Principles of Flight (Lift, Weight, Thrust, Drag), and Propulsion Evolution from Rotary Piston to Mach 5+ Scramjets.
+                                </p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                                    <span id="liveCardVenue" class="font-mono-tech" style="font-size: 11px; color: #38bdf8;">📍 G-Block, Room 406</span>
+                                    <span class="font-mono-tech" style="font-size: 11px; color: var(--cyan);">CADET ACCESS ➔</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Catalog of Published Content -->
+                    <div class="hud-card">
+                        <div class="card-header">
+                            <div>
+                                <h2><span>📂</span> PUBLISHED CONTENT CATALOG</h2>
+                                <span class="subtitle" id="contentCountLabel">0 MISSIONS PUBLISHED</span>
+                            </div>
+                            <button class="btn-tech" onclick="loadContentList()">🔄 REFRESH</button>
+                        </div>
+
+                        <div id="contentListGrid" class="content-card-grid">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ====================================================================
+             TAB 2: CADET ATTENDANCE & ROSTER
+             ==================================================================== -->
+        <div id="cadetsTab" class="tab-pane">
+            
+            <!-- Stats Row -->
+            <div class="stats-grid">
+                <div class="stat-hud">
+                    <div>
+                        <h3 id="statTotalCadets">0</h3>
+                        <p>TOTAL CADETS</p>
+                    </div>
+                    <div class="icon">👥</div>
+                </div>
+                <div class="stat-hud">
+                    <div>
+                        <h3 id="statPresentCadets" style="color: #34d399;">0</h3>
+                        <p>MARKED PRESENT</p>
+                    </div>
+                    <div class="icon">✅</div>
+                </div>
+                <div class="stat-hud">
+                    <div>
+                        <h3 id="statAwardCadets" style="color: #fbbf24;">0</h3>
+                        <p>MERIT AWARDS</p>
+                    </div>
+                    <div class="icon">🏆</div>
                 </div>
             </div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search by Name or Roll No...">
-                <span class="clear-search" id="clearSearch" onclick="clearSearch()">✕</span>
+
+            <!-- Controls Row -->
+            <div class="hud-card" style="margin-bottom: 20px;">
+                <div class="search-row">
+                    <input type="text" id="cadetSearchInput" class="form-input font-mono-tech" placeholder="🔍 Search cadet by Name, Roll No or Department..." oninput="filterCadetList(this.value)">
+                    <button class="btn-tech" onclick="exportCsv()">📥 EXPORT CSV</button>
+                    <button class="btn-tech btn-primary" onclick="showAddCadetModal()">+ ADD CADET</button>
+                    <button class="btn-tech btn-danger" onclick="promptClearAll()">🗑️ RESET ALL</button>
+                </div>
+
+                <div class="roster-filter-bar">
+                    <button class="filter-pill active" id="pillAll" onclick="setRosterFilter('all')">ALL CADETS (<span id="countPillAll">0</span>)</button>
+                    <button class="filter-pill" id="pillPresent" onclick="setRosterFilter('present')">✅ PRESENT (<span id="countPillPresent">0</span>)</button>
+                    <button class="filter-pill" id="pillAbsent" onclick="setRosterFilter('absent')">❌ ABSENT (<span id="countPillAbsent">0</span>)</button>
+                    <button class="filter-pill" id="pillRanked" onclick="setRosterFilter('ranked')">🏆 RANK WINNERS (<span id="countPillRanked">0</span>)</button>
+                </div>
+
+                <div id="cadetListContainer" class="cadet-grid">
+                    <!-- Cadets will be rendered dynamically -->
+                </div>
             </div>
-        </div>
 
-        <div id="loader">
-            <div class="spinner"></div>
-            Loading Student Data...
-        </div>
-
-        <div class="student-list" id="studentList">
-            <!-- Student Cards will be injected here -->
         </div>
 
     </div>
 
-    <div class="toast" id="toast">Update Saved</div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal">
-            <h2>Admin Login</h2>
-            <input type="password" id="adminPass" placeholder="Enter Password"
-                onkeypress="if(event.key==='Enter') verifyAdmin()">
-            <button onclick="verifyAdmin()">Login</button>
-            <p id="loginError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect Password
-            </p>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal-overlay" style="display: none;">
-        <div class="modal">
-            <h2 style="color: #d32f2f;">⚠️ Delete All Data?</h2>
-            <p>This will permanently delete all student records.</p>
-            <input type="password" id="deletePass" placeholder="Enter Password"
-                onkeypress="if(event.key==='Enter') confirmDelete()">
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="closeDelete()" style="background: #ccc; color: #333;">Cancel</button>
-                <button onclick="confirmDelete()" style="background: #d32f2f;">DELETE</button>
+    <!-- ADD CADET MODAL -->
+    <div id="addCadetModal" class="modal-overlay" style="display: none;">
+        <div class="auth-box" style="max-width: 440px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 class="font-display" style="font-size: 16px; color: #fff;">ADD NEW CADET RECORD</h3>
+                <button class="btn-tech" style="padding: 4px 8px;" onclick="closeModal('addCadetModal')">✕</button>
             </div>
-            <p id="deleteError" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect Password
-            </p>
+            
+            <form onsubmit="handleManualAddCadet(event)">
+                <div class="form-group">
+                    <label class="form-label">PSG TECH ROLL NUMBER</label>
+                    <input type="text" id="manualRoll" class="form-input font-mono-tech uppercase" placeholder="Enter Roll Number" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">FULL NAME</label>
+                    <input type="text" id="manualName" class="form-input" placeholder="E.g. Mohammed Rahil" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PHONE NUMBER</label>
+                    <input type="tel" id="manualPhone" class="form-input font-mono-tech" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">DEPARTMENT / BRANCH</label>
+                    <input type="text" id="manualDept" class="form-input" placeholder="Mechanical Engineering" required>
+                </div>
+                <div class="grid-2" style="gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label">YEAR</label>
+                        <select id="manualYear" class="form-select">
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year" selected>3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AWARD / PLACE</label>
+                        <select id="manualPlace" class="form-select">
+                            <option value="">Participant</option>
+                            <option value="1">🥇 1st Place</option>
+                            <option value="2">🥈 2nd Place</option>
+                            <option value="3">🥉 3rd Place</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button type="submit" class="btn-tech btn-primary" style="flex: 1; justify-content: center; padding: 12px;">
+                        SAVE CADET ➔
+                    </button>
+                    <button type="button" class="btn-tech" onclick="closeModal('addCadetModal')">CANCEL</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <script>
-        // REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec';
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">✓</span>
+        <span id="toastMsg">Action saved successfully</span>
+    </div>
 
-        let allStudents = [];
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script type="module">
+        import { 
+            fetchAllCadets, 
+            subscribeCadets,
+            registerCadet, 
+            updateCadetRecord, 
+            deleteCadetRecord, 
+            clearAllCadetsData,
+            fetchPublishedContent, 
+            saveContentWithPhoto, 
+            deleteContentItem,
+            isFirebaseConfigured 
+        } from '/src/firebase.js';
 
-        async function fetchStudents() {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getAll`);
-                const result = await response.json();
+        // State variables
+        let cadets = [];
+        let publishedContent = [];
+        let currentPhoto = "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800";
+        let cadetUnsub = null;
 
-                if (result.success) {
-                    allStudents = result.data;
-                    renderList(allStudents);
-                    updateStats();
-                    document.getElementById('loader').style.display = 'none';
-                } else {
-                    document.getElementById('loader').innerHTML = "Failed to load data.";
+        // Expose functions to window for onclick handlers
+        window.switchTab = switchTab;
+        window.verifyAccess = verifyAccess;
+        window.lockConsole = lockConsole;
+        window.handleFileSelected = handleFileSelected;
+        window.handleUrlImage = handleUrlImage;
+        window.pickPreset = pickPreset;
+        window.clearPhoto = clearPhoto;
+        window.updateLivePreview = updateLivePreview;
+        window.handlePublishContent = handlePublishContent;
+        window.deleteContent = deleteContent;
+        window.filterCadetList = filterCadetList;
+        window.setRosterFilter = setRosterFilter;
+        window.handleAttendanceToggle = handleAttendanceToggle;
+        window.handlePlaceChange = handlePlaceChange;
+        window.handleRetest = handleRetest;
+        window.deleteCadet = deleteCadet;
+        window.promptClearAll = promptClearAll;
+        window.exportCsv = exportCsv;
+        window.showAddCadetModal = () => document.getElementById('addCadetModal').style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        window.handleManualAddCadet = handleManualAddCadet;
+        window.loadContentList = loadContentList;
+        window.loadCadetList = loadCadetList;
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check session
+            if (sessionStorage.getItem('aeroweb_admin_auth') === 'granted') {
+                document.getElementById('authGate').style.display = 'none';
+                initConsole();
+            }
+
+            // Sync with cross-tab student registrations in real-time
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'aeroweb_cadets_cache') {
+                    loadCadetList();
                 }
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loader').innerHTML = "Error connecting to server. <br> Check if the script is deployed correctly.";
+            });
+
+            updateConnectionBadge();
+        });
+
+        function verifyAccess() {
+            const val = document.getElementById('passcodeField').value.trim();
+            if (val === '9655') {
+                sessionStorage.setItem('aeroweb_admin_auth', 'granted');
+                document.getElementById('authGate').style.display = 'none';
+                initConsole();
+            } else {
+                const err = document.getElementById('authError');
+                err.style.display = 'block';
+                document.getElementById('passcodeField').value = '';
             }
         }
 
-        function renderList(students) {
-            const listContainer = document.getElementById('studentList');
-            listContainer.innerHTML = '';
+        function lockConsole() {
+            if (cadetUnsub) {
+                cadetUnsub();
+                cadetUnsub = null;
+            }
+            sessionStorage.removeItem('aeroweb_admin_auth');
+            document.getElementById('authGate').style.display = 'flex';
+            document.getElementById('passcodeField').value = '';
+        }
 
-            if (students.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="empty-state">
-                        <span class="empty-icon">🔍</span>
-                        <h3>No Students Found</h3>
-                        <p>Try adjusting your search or refresh the data.</p>
-                    </div>
-                `;
+        async function initConsole() {
+            await Promise.all([
+                loadCadetList(),
+                loadContentList()
+            ]);
+            updateConnectionBadge();
+        }
+
+        function updateConnectionBadge() {
+            const badge = document.getElementById('connectionStatus');
+            const text = document.getElementById('connectionStatusText');
+            if (isFirebaseConfigured()) {
+                badge.className = 'status-pill online';
+                text.innerText = 'FIREBASE CLOUD ONLINE';
+            } else {
+                badge.className = 'status-pill offline';
+                text.innerText = 'LOCAL CACHE READY';
+            }
+        }
+
+        /* --- TABS SWITCHER --- */
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        /* --- PHOTO STUDIO LOGIC --- */
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Compress / scale image to optimal data URL for instant storage
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    setPhoto(compressedDataUrl);
+                    showToast('Photo optimized & attached ✓');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleUrlImage(url) {
+            if (url && url.startsWith('http')) {
+                setPhoto(url);
+            }
+        }
+
+        function pickPreset(url) {
+            document.querySelectorAll('.preset-thumb').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('photoUrlInput').value = '';
+            setPhoto(url);
+        }
+
+        function setPhoto(src) {
+            currentPhoto = src;
+            document.getElementById('previewImage').src = src;
+            document.getElementById('previewBox').style.display = 'block';
+            document.getElementById('liveCardImg').src = src;
+        }
+
+        function clearPhoto() {
+            currentPhoto = "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800";
+            document.getElementById('photoFileInput').value = '';
+            document.getElementById('photoUrlInput').value = '';
+            setPhoto(currentPhoto);
+        }
+
+        function updateLivePreview() {
+            const title = document.getElementById('postTitle').value.trim() || 'FLIGHT & PROPULSION SYSTEMS: TECHNICAL WORKSHOP';
+            const category = document.getElementById('postCategory').value;
+            const badge = document.getElementById('postBadge').value.trim() || category.toUpperCase();
+            const date = document.getElementById('postDate').value.trim() || 'SCHEDULED';
+            const location = document.getElementById('postLocation').value.trim() || 'PSG Tech Aero Campus';
+            const summary = document.getElementById('postSummary').value.trim() || 'Multi-stage rocketry dynamics and aerodynamic simulation challenge.';
+
+            document.getElementById('liveCardTitle').innerText = title;
+            document.getElementById('liveCardBadge').innerText = badge;
+            document.getElementById('liveCardDate').innerText = date;
+            document.getElementById('liveCardVenue').innerText = `📍 ${location}`;
+            document.getElementById('liveCardSummary').innerText = summary;
+        }
+
+        async function handlePublishContent(event) {
+            event.preventDefault();
+
+            const isLive = document.getElementById('postIsLive')?.checked || false;
+            const time = document.getElementById('postTime')?.value.trim() || '09:30 AM - 05:00 PM';
+            const prizes = document.getElementById('postPrizes')?.value.trim() || '';
+
+            const item = {
+                id: `content-${Date.now()}`,
+                title: document.getElementById('postTitle').value.trim(),
+                category: document.getElementById('postCategory').value,
+                badge: document.getElementById('postBadge').value.trim() || (isLive ? 'FLAGSHIP MISSION' : document.getElementById('postCategory').value.toUpperCase()),
+                date: document.getElementById('postDate').value.trim() || 'SCHEDULED',
+                time: time,
+                prizes: prizes,
+                isLive: isLive,
+                location: document.getElementById('postLocation').value.trim() || 'PSG Tech Aero Campus',
+                summary: document.getElementById('postSummary').value.trim(),
+                photo: currentPhoto,
+                publishedAt: new Date().toISOString()
+            };
+
+            await saveContentWithPhoto(item);
+            showToast(isLive ? 'Hero Flagship Mission Published! ★🚀' : 'Mission Published with Photo! 🚀');
+
+            // Reset form
+            document.getElementById('contentForm').reset();
+            clearPhoto();
+            updateLivePreview();
+            loadContentList();
+        }
+
+        async function loadContentList() {
+            publishedContent = await fetchPublishedContent();
+            const container = document.getElementById('contentListGrid');
+            const countLabel = document.getElementById('contentCountLabel');
+            countLabel.innerText = `${publishedContent.length} ITEMS PUBLISHED`;
+
+            if (publishedContent.length === 0) {
+                container.innerHTML = `<p class="font-mono-tech" style="color: var(--text-dim); font-size: 13px; grid-column: 1/-1; text-align: center; padding: 20px;">No published missions found. Use the form to publish content with photos!</p>`;
                 return;
             }
 
-            // Performance: Use Fragment
-            const fragment = document.createDocumentFragment();
-
-            students.forEach((student, index) => {
-                const isPresent = String(student.attendance) === "1";
-                const place = String(student.place).trim(); // "1", "2", "3", or empty
-
-                // Avatar Initials
-                const initials = student.name.split(' ').map(n => n[0]).slice(0, 2).join('');
-                // Deterministic Color based on roll no
-                const colors = ['#e3f2fd', '#e8eaf6', '#f3e5f5', '#fff3e0', '#e0f2f1'];
-                const colorIndex = (student.rollNo || 0).toString().charCodeAt(0) % colors.length;
-                const avatarBg = colors[colorIndex];
-
-                const card = document.createElement('div');
-                card.className = `student-card ${isPresent ? 'present' : ''}`;
-                card.id = `card-${student.rollNo}`;
-                card.style.animationDelay = `${Math.min(index * 0.03, 1)}s`; // Stagger max 1s
-
-                card.innerHTML = `
-                    <div class="student-flex-group">
-                        <div class="avatar" style="background: ${avatarBg}">${initials}</div>
-                        <div class="student-info">
-                            <div class="student-name">${student.name}</div>
-                            <div class="student-meta"><span class="roll-badge">${student.rollNo}</span> ${student.dept}</div>
+            container.innerHTML = publishedContent.map(item => `
+                <div class="content-item-card">
+                    <img src="${item.photo || 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800'}" class="content-item-thumb" alt="${item.title}">
+                    <div class="content-item-content">
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px;">
+                            <span class="font-mono-tech" style="font-size: 10px; color: var(--cyan); padding: 1px 5px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.25); border-radius: 3px;">
+                                ${item.badge || item.category.toUpperCase()}
+                            </span>
+                            ${item.isLive ? '<span class="font-mono-tech" style="background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">★ HERO FLAGSHIP</span>' : ''}
                         </div>
+                        <h4 class="font-display" style="font-size: 14px; color: #fff; margin: 4px 0;">${item.title}</h4>
+                        <p class="font-mono-tech" style="font-size: 10px; color: var(--text-dim); margin-bottom: 6px;">
+                            ${item.date} ${item.time ? '• ' + item.time : ''}
+                        </p>
+                        ${item.prizes ? `<p class="font-mono-tech" style="font-size: 10px; color: #fbbf24; margin-bottom: 6px;">🏆 ${item.prizes}</p>` : ''}
+                        <p style="font-size: 11px; color: #94a3b8; line-height: 1.3;">${item.summary || ''}</p>
                     </div>
-                    <div class="actions">
-                        <!-- Place Select -->
-                        <select class="place-select ${getRankClass(place)}" onchange="updateRecord('${student.rollNo}', 'place', this.value, this)">
-                            <option value="" ${place === '' ? 'selected' : ''}>Participant</option>
-                            <option value="1" ${place === '1' ? 'selected' : ''}>🥇 1st Place</option>
-                            <option value="2" ${place === '2' ? 'selected' : ''}>🥈 2nd Place</option>
-                            <option value="3" ${place === '3' ? 'selected' : ''}>🥉 3rd Place</option>
-                        </select>
-
-                        <!-- Attendance Toggle -->
-                        <label class="switch">
-                            <input type="checkbox" ${isPresent ? 'checked' : ''} onchange="updateRecord('${student.rollNo}', 'attendance', this.checked ? '1' : '', this)">
-                            <span class="slider"></span>
-                        </label>
+                    <div style="padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end;">
+                        <button class="btn-tech btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteContent('${item.id}')">
+                            DELETE 🗑️
+                        </button>
                     </div>
-                `;
-                fragment.appendChild(card);
-            });
-
-            listContainer.appendChild(fragment);
+                </div>
+            `).join('');
         }
 
-        function getRankClass(val) {
-            if (val === '1') return 'rank-1';
-            if (val === '2') return 'rank-2';
-            if (val === '3') return 'rank-3';
-            return '';
+        async function deleteContent(id) {
+            if (!confirm("Are you sure you want to delete this content item?")) return;
+            await deleteContentItem(id);
+            showToast("Content item removed ✓");
+            loadContentList();
         }
 
-        // Optimistic UI Update with Debounce/Queue could be better, but simple direct call for now.
-        async function updateRecord(rollNo, field, value, element) {
-            // UI Feedback
-            if (field === 'attendance') {
-                const card = document.getElementById(`card-${rollNo}`);
-                if (value === '1') card.classList.add('present');
-                else card.classList.remove('present');
+        /* --- CADET ATTENDANCE & ROSTER LOGIC --- */
+        let currentRosterFilter = 'all';
 
-                // Update local data for stats
-                const s = allStudents.find(s => s.rollNo === rollNo);
-                if (s) s.attendance = value;
-                updateStats();
-            }
+        async function loadCadetList() {
+            cadets = await fetchAllCadets();
+            applyCadetFilters();
+            updateCadetStats();
 
-            if (field === 'place') {
-                // Update styling
-                element.className = `place-select ${getRankClass(value)}`;
-                // Update local
-                const s = allStudents.find(s => s.rollNo === rollNo);
-                if (s) s.place = value;
-            }
-
-            // Sync with Server
-            try {
-                // Use no-cors to avoid CORS errors if pure text isn't returned, 
-                // but since we return JSON, standard CORS should work if script is "Anyone".
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'update', rollNo, field, value })
+            if (!cadetUnsub) {
+                cadetUnsub = subscribeCadets((updatedCadets) => {
+                    cadets = updatedCadets;
+                    applyCadetFilters();
+                    updateCadetStats();
                 });
-
-                // Since this might be opaque/no-cors depending on browser restrictions with Apps Script:
-                // We assume success if no network error. Use console for debugging.
-                const respText = await response.text();
-                console.log("Server response:", respText);
-                showToast("Saved ✓");
-
-            } catch (error) {
-                console.error("Update failed", error);
-                showToast("Error Saving!", true);
-                // Ideally revert UI change here
             }
         }
 
-        function updateStats() {
-            const total = allStudents.length;
-            const present = allStudents.filter(s => String(s.attendance) === "1").length;
-            document.getElementById('countTotal').innerText = total;
-            document.getElementById('countPresent').innerText = present;
+        function setRosterFilter(filterType) {
+            currentRosterFilter = filterType;
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            if (filterType === 'all') document.getElementById('pillAll')?.classList.add('active');
+            if (filterType === 'present') document.getElementById('pillPresent')?.classList.add('active');
+            if (filterType === 'absent') document.getElementById('pillAbsent')?.classList.add('active');
+            if (filterType === 'ranked') document.getElementById('pillRanked')?.classList.add('active');
+            applyCadetFilters();
         }
 
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.background = isError ? '#d32f2f' : '#333';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
+        function filterCadetList() {
+            applyCadetFilters();
         }
 
-        // Search Logic
-        const searchInput = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearSearch');
+        function applyCadetFilters() {
+            const q = (document.getElementById('cadetSearchInput')?.value || '').toLowerCase().trim();
+            let list = [...cadets];
 
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            clearBtn.style.display = term ? 'block' : 'none';
-
-            const filtered = allStudents.filter(s =>
-                s.name.toLowerCase().includes(term) ||
-                String(s.rollNo).toLowerCase().includes(term)
-            );
-            renderList(filtered);
-        });
-
-        function clearSearch() {
-            searchInput.value = '';
-            clearBtn.style.display = 'none';
-            renderList(allStudents);
-            searchInput.focus();
-        }
-
-        // Init - Blocked by Login
-        // fetchStudents(); 
-
-        // --- Security Logic ---
-        function verifyAdmin() {
-            const pass = document.getElementById('adminPass').value;
-            if (pass === '9182') {
-                document.getElementById('loginModal').style.display = 'none';
-                fetchStudents(); // Load data only after login
-            } else {
-                const err = document.getElementById('loginError');
-                err.style.display = 'block';
-                err.innerText = "Incorrect Password!";
-                document.getElementById('adminPass').value = '';
-                document.getElementById('adminPass').focus();
+            if (currentRosterFilter === 'present') {
+                list = list.filter(c => String(c.attendance) === '1');
+            } else if (currentRosterFilter === 'absent') {
+                list = list.filter(c => String(c.attendance) !== '1');
+            } else if (currentRosterFilter === 'ranked') {
+                list = list.filter(c => ['1', '2', '3'].includes(String(c.place || '').trim()));
             }
+
+            if (q) {
+                list = list.filter(c => 
+                    (c.name || '').toLowerCase().includes(q) || 
+                    (c.roll || c.rollNo || '').toLowerCase().includes(q) ||
+                    (c.phone || c.phoneNo || '').toLowerCase().includes(q) ||
+                    (c.dept || '').toLowerCase().includes(q)
+                );
+            }
+
+            renderCadets(list);
         }
 
-        // --- Delete Logic ---
-        function promptDelete() {
-            document.getElementById('deleteModal').style.display = 'flex';
-            document.getElementById('deletePass').value = '';
-            document.getElementById('deleteError').style.display = 'none';
-            document.getElementById('deletePass').focus();
-        }
+        function renderCadets(list) {
+            const container = document.getElementById('cadetListContainer');
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p class="font-mono-tech" style="color: var(--text-dim); font-size: 13px; text-align: center; padding: 30px;">No cadets match the criteria.</p>`;
+                return;
+            }
 
-        function closeDelete() {
-            document.getElementById('deleteModal').style.display = 'none';
-        }
+            container.innerHTML = list.map(c => {
+                const roll = c.roll || c.rollNo || 'N/A';
+                const isPresent = String(c.attendance) === '1';
+                const place = String(c.place || '').trim();
+                const phone = c.phone || c.phoneNo || 'N/A';
+                const initials = (c.name || 'C').split(' ').map(n => n[0]).slice(0, 2).join('');
 
-        async function confirmDelete() {
-            const pass = document.getElementById('deletePass').value;
-            if (pass === '2819') {
-                // Execute Delete
-                document.getElementById('deleteModal').innerHTML = '<div class="modal"><h3>Deleting...</h3><div class="spinner"></div></div>';
-
-                try {
-                    const response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'clearAll' })
-                    });
-                    const result = await response.json();
-
-                    if (result.success) {
-                        alert("Database Cleared Successfully!");
-                        location.reload();
-                    } else {
-                        alert("Failed: " + result.message);
-                        location.reload();
-                    }
-                } catch (e) {
-                    console.error(e);
-                    alert("Error connecting to server.");
-                    location.reload();
+                let certBadgeHtml = '';
+                if (!isPresent) {
+                    certBadgeHtml = '<span class="cert-status-badge absent">❌ Absent (No Cert)</span>';
+                } else if (place === '1') {
+                    certBadgeHtml = '<span class="cert-status-badge rank-1">🥇 1st Rank Cert</span>';
+                } else if (place === '2') {
+                    certBadgeHtml = '<span class="cert-status-badge rank-2">🥈 2nd Rank Cert</span>';
+                } else if (place === '3') {
+                    certBadgeHtml = '<span class="cert-status-badge rank-3">🥉 3rd Rank Cert</span>';
+                } else {
+                    certBadgeHtml = '<span class="cert-status-badge participant">📜 Participation Cert</span>';
                 }
 
-            } else {
-                const err = document.getElementById('deleteError');
-                err.style.display = 'block';
-                err.innerText = "Wrong Confirmation Password!";
-                document.getElementById('deletePass').value = '';
+                return `
+                    <div class="cadet-card ${isPresent ? 'present' : ''}" id="cadet-${roll}">
+                        <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+                            <div class="cadet-avatar">${initials}</div>
+                            <div class="cadet-info">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px;">
+                                    <span class="cadet-name" style="margin-bottom: 0;">${c.name}</span>
+                                    ${certBadgeHtml}
+                                </div>
+                                <div class="cadet-meta">
+                                    <span class="cadet-roll-badge">${roll}</span>
+                                    <span style="color: #38bdf8;">📞 ${phone}</span>
+                                    <span>${c.dept || ''}</span>
+                                    <span>• ${c.year || ''}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cadet-actions">
+                            <select class="select-place ${place === '1' ? 'rank-1' : place === '2' ? 'rank-2' : place === '3' ? 'rank-3' : ''}" onchange="handlePlaceChange('${roll}', this.value, this)" title="Assign Rank or Participation">
+                                <option value="" ${place === '' ? 'selected' : ''}>Participant</option>
+                                <option value="1" ${place === '1' ? 'selected' : ''}>🥇 1st Place</option>
+                                <option value="2" ${place === '2' ? 'selected' : ''}>🥈 2nd Place</option>
+                                <option value="3" ${place === '3' ? 'selected' : ''}>🥉 3rd Place</option>
+                            </select>
+
+                            <button class="btn-tech" style="padding: 4px 8px; font-size: 10px;" onclick="handleRetest('${roll}')" title="Clear MCQ score for retest">
+                                🔄 RETEST
+                            </button>
+
+                            <a href="/#archives" target="_blank" class="btn-tech" style="padding: 4px 8px; font-size: 10px;" title="Preview Certificate on Site">
+                                CERT ↗
+                            </a>
+
+                            <label class="switch" title="Toggle Attendance (Present/Absent)">
+                                <input type="checkbox" ${isPresent ? 'checked' : ''} onchange="handleAttendanceToggle('${roll}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+
+                            <button class="btn-tech btn-danger" style="padding: 4px 8px; font-size: 10px;" onclick="deleteCadet('${roll}')" title="Delete Cadet">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCadetStats() {
+            const total = cadets.length;
+            const present = cadets.filter(c => String(c.attendance) === '1').length;
+            const absent = total - present;
+            const awards = cadets.filter(c => ['1', '2', '3'].includes(String(c.place || '').trim())).length;
+
+            document.getElementById('statTotalCadets').innerText = total;
+            document.getElementById('statPresentCadets').innerText = present;
+            document.getElementById('statAwardCadets').innerText = awards;
+
+            if (document.getElementById('countPillAll')) document.getElementById('countPillAll').innerText = total;
+            if (document.getElementById('countPillPresent')) document.getElementById('countPillPresent').innerText = present;
+            if (document.getElementById('countPillAbsent')) document.getElementById('countPillAbsent').innerText = absent;
+            if (document.getElementById('countPillRanked')) document.getElementById('countPillRanked').innerText = awards;
+        }
+
+        async function handleAttendanceToggle(roll, isPresent) {
+            const val = isPresent ? '1' : '';
+            const item = cadets.find(c => (c.roll || c.rollNo) === roll);
+            if (item) item.attendance = val;
+            
+            applyCadetFilters();
+            updateCadetStats();
+
+            await updateCadetRecord(roll, { attendance: val });
+            showToast(`Attendance updated: ${roll} -> ${isPresent ? 'PRESENT' : 'ABSENT'} ✓`);
+        }
+
+        async function handlePlaceChange(roll, value, selectEl) {
+            const item = cadets.find(c => (c.roll || c.rollNo) === roll);
+            if (item) item.place = value;
+            
+            applyCadetFilters();
+            updateCadetStats();
+
+            await updateCadetRecord(roll, { place: value });
+            showToast(`Award rank updated: ${roll} ✓`);
+        }
+
+        async function handleRetest(roll) {
+            if (!confirm(`Allow re-entry / test reset for ${roll}?`)) return;
+            await updateCadetRecord(roll, { retestAllowed: true, score: null });
+            showToast(`Retest permitted for ${roll} ✓`);
+        }
+
+        async function deleteCadet(roll) {
+            if (!confirm(`Delete cadet ${roll}?`)) return;
+            await deleteCadetRecord(roll);
+            cadets = cadets.filter(c => (c.roll || c.rollNo) !== roll);
+            applyCadetFilters();
+            updateCadetStats();
+            showToast(`Cadet deleted ✓`);
+        }
+
+        async function promptClearAll() {
+            const pass = prompt("DANGER: Enter admin passkey to clear all cadet records:");
+            if (pass === '9655') {
+                await clearAllCadetsData();
+                cadets = [];
+                applyCadetFilters();
+                updateCadetStats();
+                showToast("All cadet records cleared ✓");
+            } else if (pass !== null) {
+                alert("Incorrect password!");
             }
         }
 
-        // Refresh every 30s to keep sync? Maybe too much. Let's stick to manual load.
+        async function handleManualAddCadet(event) {
+            event.preventDefault();
+            const roll = document.getElementById('manualRoll').value.trim().toUpperCase();
+            const existing = cadets.find(c => (c.roll || c.rollNo || '').toUpperCase() === roll);
+            if (existing) {
+                if (!confirm(`Cadet ${roll} is already registered in the roster (${existing.name}). Do you want to update their record?`)) {
+                    return;
+                }
+            }
+            const name = document.getElementById('manualName').value.trim();
+            const phone = document.getElementById('manualPhone').value.trim();
+            const dept = document.getElementById('manualDept').value.trim();
+            const year = document.getElementById('manualYear').value;
+            const place = document.getElementById('manualPlace').value;
+
+            const cadetData = {
+                roll,
+                rollNo: roll,
+                name,
+                phone,
+                dept,
+                year,
+                place,
+                attendance: "1",
+                flightCode: `DS-${Math.floor(1000 + Math.random() * 9000)}`
+            };
+
+            await registerCadet(cadetData);
+            closeModal('addCadetModal');
+            document.getElementById('manualRoll').value = '';
+            document.getElementById('manualName').value = '';
+            document.getElementById('manualPhone').value = '';
+            document.getElementById('manualDept').value = '';
+            showToast(`Cadet ${roll} added successfully ✓`);
+            loadCadetList();
+        }
+
+        function exportCsv() {
+            if (!cadets || cadets.length === 0) {
+                alert("No cadets to export.");
+                return;
+            }
+            let csv = "Roll No,Name,Phone,Department,Year,Attendance,Award/Place,Registered At\n";
+            cadets.forEach(c => {
+                const att = String(c.attendance) === '1' ? 'PRESENT' : 'ABSENT';
+                const pl = c.place === '1' ? '1st Place' : c.place === '2' ? '2nd Place' : c.place === '3' ? '3rd Place' : 'Participant';
+                csv += `"${c.roll || c.rollNo}","${c.name || ''}","${c.phone || c.phoneNo || ''}","${c.dept || ''}","${c.year || ''}","${att}","${pl}","${c.registeredAt || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DSDAEA_Cadets_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        /* --- TOAST HELPER --- */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2600);
+        }
     </script>
+
 </body>
 
 </html>

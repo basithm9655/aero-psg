@@ -1,44 +1,92 @@
-/**
- * Certificate API Integration
- * Handles fetching certificate data from Google Apps Script endpoint
- */
+import { fetchCertificateFromDb, getCadetByRoll } from '../firebase.js';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec';
+// Certificate verification helper functions
+
+/**
+ * Helper to normalize award / rank title
+ */
+export function formatRankTitle(place) {
+    const p = String(place || '').trim();
+    if (p === '1') return 'Winner - 1st Rank';
+    if (p === '2') return 'Achieved 2nd Place';
+    if (p === '3') return 'Achieved 3rd Place';
+    if (p.toLowerCase().includes('1st') || p.toLowerCase().includes('winner') || p.toLowerCase().includes('rank 1')) {
+        return 'Winner - 1st Rank';
+    }
+    if (p.toLowerCase().includes('2nd') || p.toLowerCase().includes('runner') || p.toLowerCase().includes('rank 2')) {
+        return 'Achieved 2nd Place';
+    }
+    if (p.toLowerCase().includes('3rd') || p.toLowerCase().includes('rank 3')) {
+        return 'Achieved 3rd Place';
+    }
+    return 'Certificate of Participation';
+}
 
 /**
  * Fetch certificate data for a given roll number
+ * Rules:
+ * 1. Must be registered in system.
+ * 2. Must be marked PRESENT by admin (attendance == '1').
+ * 3. If rank 1, 2, 3 assigned -> Certificate with Rank.
+ * 4. Otherwise -> Certificate of Participation.
+ * 
  * @param {string} rollNo - Student roll number
  * @returns {Promise<Object>} Certificate data object
- * @throws {Error} If fetch fails or roll number not found
+ * @throws {Error} If not registered or attendance not verified
  */
 export async function fetchCertificateData(rollNo) {
     if (!rollNo || typeof rollNo !== 'string') {
-        throw new Error('Invalid roll number');
+        throw new Error('Please enter a valid roll number.');
     }
 
+    const cleanRoll = rollNo.trim().toUpperCase();
+
+    // 1. Check direct Certificate database records (issued credentials)
     try {
-        const response = await fetch(`${SCRIPT_URL}?rollNo=${encodeURIComponent(rollNo.trim())}`);
-
-        if (!response.ok) {
-            throw new Error(`Network error: ${response.status} ${response.statusText}`);
+        const cloudCert = await fetchCertificateFromDb(cleanRoll);
+        if (cloudCert && cloudCert.name && cloudCert.rollNo) {
+            return {
+                ...cloudCert,
+                place: formatRankTitle(cloudCert.place)
+            };
         }
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Certificate not found');
-        }
-
-        // Validate response data structure
-        if (!data.data || !data.data.name || !data.data.rollNo) {
-            throw new Error('Invalid certificate data received');
-        }
-
-        return data.data;
-    } catch (error) {
-        if (error.message.includes('Certificate not found') || error.message.includes('Invalid certificate data')) {
-            throw error;
-        }
-        throw new Error('Network error. Please check your connection and try again.');
+    } catch (e) {
+        console.warn("Direct certificate DB check issue:", e.message);
     }
+
+    // 2. Check Cadet Registration & Attendance Database
+    try {
+        const cadet = await getCadetByRoll(cleanRoll);
+        if (cadet) {
+            const isPresent = String(cadet.attendance) === '1';
+            
+            // If student registered but admin has NOT marked attendance:
+            if (!isPresent) {
+                throw new Error(
+                    `ATTENDANCE UNVERIFIED: Cadet ${cadet.name} (${cleanRoll}) is registered, but event attendance has not been verified by Mission Control. Certificates are only issued to cadets who attended.`
+                );
+            }
+
+            // Student attended! Check rank (1st, 2nd, 3rd, or Participation)
+            const rankText = formatRankTitle(cadet.place);
+
+            return {
+                name: cadet.name,
+                rollNo: cleanRoll,
+                phone: cadet.phone || '',
+                year: cadet.year || '4th',
+                dept: cadet.dept || 'Aerospace Engineering',
+                place: rankText,
+                event: cadet.event || 'FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026'
+            };
+        }
+    } catch (err) {
+        // If it's the attendance unverified error, rethrow directly
+        if (err.message && err.message.includes('ATTENDANCE UNVERIFIED')) {
+            throw err;
+        }
+        console.warn("Cadet attendance check error:", err.message);
+    }
+
+    throw new Error(`Cadet ${cleanRoll} is not found in the verified event roster. Please ensure registration at the Cadet Entry Portal.`);
 }

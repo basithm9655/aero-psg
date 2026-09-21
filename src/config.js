@@ -38,27 +38,18 @@ export const CONFIG = {
         longDesc: "We bring together engineers, designers, and innovators passionate about aeronautics, propulsion, UAVs, rocketry, and simulation technologies. Through hands-on projects, technical workshops, competitions, and industry collaboration, we bridge the gap between theory and real-world aerospace applications. Our mission is to ignite curiosity, build competence, and launch future-ready engineers.",
     },
 
-    // Google Form Integration (for registration)
     sound: {
         enabled: true, // Master toggle
         volume: 0.5,
     },
-    googleForm: {
-        enabled: true, // Set to false to disable form submission
-        url: "https://docs.google.com/forms/u/0/d/e/1FAIpQLSc_R9SnfJLULefvQEar6xIjnKQPnG1EEUyUmMBOj2q3INnK6w/formResponse",
-        entryIds: {
-            rollNo: "entry.1980545502",
-            name: "entry.1735108337",
-            year: "entry.235212158",
-            dept: "entry.1142478584",
-            event: "entry.520065292",
-        },
-    },
 
-    // Certificate Generator API
-    certificate: {
-        apiUrl: "https://script.google.com/macros/s/AKfycbwiATQBGETzz6AGwQ9nHDrmLM2P09T7gySVf7JmFIZlRD94yWWskmrOvk5gm7pnIniO/exec",
+    // Cloud Database & Backend (Firebase)
+    // Connect your Firebase credentials in src/firebase.js or via the Admin Panel (/admin.html)
+    firebase: {
         enabled: true,
+        collectionCadets: "cadet_registrations",
+        collectionContent: "site_content",
+        collectionCertificates: "certificates"
     },
 
     // Countdown Timer - EASY CUSTOMIZATION

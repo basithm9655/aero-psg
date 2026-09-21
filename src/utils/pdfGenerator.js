@@ -1,15 +1,13 @@
 /**
- * Professional PDF Certificate Generator - OPTIMIZED for ALL DEVICES
- * Generates high-quality PDF certificates using jsPDF + html2canvas
- * Ensures full A4 landscape page utilization
+ * High-Precision Certificate Exporter (PDF & JPG) - DSDAEA PSG TECH
+ * Produces 300 DPI high-fidelity A4 landscape output via jsPDF + html2canvas
  */
 
 /**
- * Wait for all images in element to load
- * @param {HTMLElement} element - Element to check for images
- * @returns {Promise<void>}
+ * Wait for all images inside an element to be completely loaded and decoded,
+ * and ensure Google Web Fonts are ready for canvas rendering.
  */
-async function waitForImages(element) {
+async function waitForImagesAndFonts(element) {
     const images = element.getElementsByTagName('img');
     const promises = [];
 
@@ -18,8 +16,7 @@ async function waitForImages(element) {
             promises.push(
                 new Promise((resolve) => {
                     img.onload = resolve;
-                    img.onerror = resolve; // Resolve even on error to not block
-                    // Force reload if src is set but not loaded
+                    img.onerror = resolve; // Continue even if an image fails
                     if (img.src && !img.complete) {
                         const src = img.src;
                         img.src = '';
@@ -27,173 +24,178 @@ async function waitForImages(element) {
                     }
                 })
             );
+        } else if (img.decode) {
+            promises.push(img.decode().catch(() => {}));
         }
     }
 
     await Promise.all(promises);
-    // Extra delay to ensure images are painted
-    await new Promise(resolve => setTimeout(resolve, 200));
+
+    if (document.fonts) {
+        await document.fonts.ready;
+        try {
+            await Promise.all([
+                document.fonts.load('800 40px "Cinzel"'),
+                document.fonts.load('800 40px "Cinzel Decorative"'),
+                document.fonts.load('400 68px "Pinyon Script"'),
+                document.fonts.load('400 34px "Alex Brush"'),
+                document.fonts.load('700 14px "Playfair Display"'),
+                document.fonts.load('600 10px "Montserrat"')
+            ]);
+        } catch (e) {
+            // Non-blocking fallback
+        }
+    }
+
+    // Safety settling interval for canvas rasterizer
+    await new Promise((resolve) => setTimeout(resolve, 400));
 }
 
 /**
- * Generate PDF from certificate HTML element - OPTIMIZED VERSION
- * @param {string} elementId - ID of the certificate element to convert
- * @param {string} filename - Desired filename for the PDF
- * @returns {Promise<void>}
+ * Capture an element at exact 1122px x 794px with 2x resolution
  */
-export async function generateCertificatePDF(elementId, filename) {
-    let element = null;
+async function captureCertificateCanvas(elementId) {
+    const { default: html2canvas } = await import('html2canvas');
+
+    const element = document.getElementById(elementId);
+    if (!element) {
+        throw new Error(`Certificate element #${elementId} not found.`);
+    }
+
+    // Save initial style values
+    const prevStyles = {
+        display: element.style.display,
+        position: element.style.position,
+        left: element.style.left,
+        top: element.style.top,
+        opacity: element.style.opacity,
+        visibility: element.style.visibility,
+        zIndex: element.style.zIndex,
+        width: element.style.width,
+        height: element.style.height,
+        transform: element.style.transform,
+    };
+
+    // Temporarily bring the element to top-left for flawless capture
+    element.style.display = 'block';
+    element.style.position = 'fixed';
+    element.style.left = '0px';
+    element.style.top = '0px';
+    element.style.opacity = '1';
+    element.style.visibility = 'visible';
+    element.style.zIndex = '999999';
+    element.style.width = '1122px';
+    element.style.height = '794px';
+    element.style.transform = 'none';
 
     try {
-        // Dynamically import libraries
-        const { default: jsPDF } = await import('jspdf');
-        const { default: html2canvas } = await import('html2canvas');
+        await waitForImagesAndFonts(element);
 
-        // Get the certificate element
-        element = document.getElementById(elementId);
-        if (!element) {
-            throw new Error('Certificate element not found');
-        }
-
-        // CRITICAL: Make element visible and properly positioned
-        // Save original styles
-        const originalStyles = {
-            display: element.style.display,
-            position: element.style.position,
-            left: element.style.left,
-            top: element.style.top,
-            opacity: element.style.opacity,
-            visibility: element.style.visibility,
-            transform: element.style.transform,
-            width: element.style.width,
-            height: element.style.height
-        };
-
-        // Position element for capture - VISIBLE but off-screen
-        element.style.display = 'block';
-        element.style.position = 'fixed';
-        element.style.left = '0';
-        element.style.top = '0';
-        element.style.opacity = '1';
-        element.style.visibility = 'visible';
-        element.style.zIndex = '999999';
-        element.style.transform = 'none';
-
-        // Force exact A4 landscape dimensions (in pixels at 96 DPI)
-        // A4 landscape: 297mm x 210mm = 1122px x 794px at 96 DPI
-        element.style.width = '1122px';
-        element.style.height = '794px';
-
-        // Wait for images to load
-        await waitForImages(element);
-
-        // Additional delay for full rendering
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        console.log('Starting PDF generation...');
-
-        // Capture with html2canvas - OPTIMIZED SETTINGS
         const canvas = await html2canvas(element, {
-            scale: 2, // 2x scale for quality without huge file size
-            useCORS: true, // Enable cross-origin images
-            allowTaint: true, // Allow local images
-            backgroundColor: '#FFFDF5', // Certificate cream background
-            width: 1122, // A4 landscape width
-            height: 794, // A4 landscape height
+            scale: 2, // 2x scale: 2244px x 1588px (300 DPI equivalent)
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#FFFDF8',
+            width: 1122,
+            height: 794,
             windowWidth: 1122,
             windowHeight: 794,
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
             logging: false,
             imageTimeout: 15000,
-            removeContainer: false,
             onclone: (clonedDoc) => {
-                // Ensure cloned element maintains dimensions and visibility
                 const clonedElement = clonedDoc.getElementById(elementId);
                 if (clonedElement) {
                     clonedElement.style.display = 'block';
-                    clonedElement.style.opacity = '1';
-                    clonedElement.style.visibility = 'visible';
+                    clonedElement.style.position = 'absolute';
+                    clonedElement.style.left = '0px';
+                    clonedElement.style.top = '0px';
                     clonedElement.style.width = '1122px';
                     clonedElement.style.height = '794px';
-                    clonedElement.style.position = 'relative';
                     clonedElement.style.transform = 'none';
-
-                    // Remove any transforms from nested elements
-                    const wrapper = clonedElement.querySelector('.certificate-wrapper');
-                    if (wrapper) {
-                        wrapper.style.transform = 'none';
-                        wrapper.style.width = '1122px';
-                        wrapper.style.height = '794px';
-                        wrapper.style.margin = '0';
-                    }
+                    clonedElement.style.opacity = '1';
+                    clonedElement.style.visibility = 'visible';
                 }
-            }
+            },
         });
 
-        console.log(`Canvas captured: ${canvas.width}x${canvas.height}`);
-
-        // Restore original styles
-        Object.keys(originalStyles).forEach(key => {
-            element.style[key] = originalStyles[key];
+        return canvas;
+    } finally {
+        // Always restore original styles
+        Object.keys(prevStyles).forEach((key) => {
+            element.style[key] = prevStyles[key];
         });
-
-        // Verify canvas has content
-        if (canvas.width === 0 || canvas.height === 0) {
-            throw new Error('Canvas is empty - certificate did not render');
-        }
-
-        // Create PDF with A4 landscape orientation
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-            compress: true,
-        });
-
-        // A4 landscape dimensions in mm
-        const pdfWidth = 297;
-        const pdfHeight = 210;
-
-        // Convert canvas to high-quality image
-        const imgData = canvas.toDataURL('image/jpeg', 0.98); // 98% quality
-
-        // Add image to PDF - FULL PAGE, no margins
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-
-        console.log('PDF created successfully');
-
-        // Download the PDF
-        pdf.save(filename);
-
-        return { success: true };
-    } catch (error) {
-        console.error('PDF generation error:', error);
-
-        // Restore element if error occurred
-        if (element) {
-            element.style.display = 'none';
-            element.style.position = 'absolute';
-            element.style.left = '-9999px';
-        }
-
-        throw new Error(`Failed to generate PDF: ${error.message}`);
     }
 }
 
 /**
- * Generate PDF filename from certificate data
- * @param {Object} data - Certificate data
- * @returns {string} Formatted filename
+ * Generate and download high-resolution PDF certificate
  */
-export function generatePDFFilename(data) {
-    if (!data || !data.rollNo || !data.name) {
-        return 'Certificate.pdf';
+export async function generateCertificatePDF(elementId = 'certificate-print-zone', filename = 'Certificate.pdf') {
+    const { default: jsPDF } = await import('jspdf');
+
+    const canvas = await captureCertificateCanvas(elementId);
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas render was empty');
     }
 
-    // Clean the name (remove special characters, replace spaces with underscores)
+    const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+    pdf.save(filename);
+
+    return { success: true };
+}
+
+/**
+ * Generate and download high-resolution JPG certificate
+ */
+export async function generateCertificateJPG(elementId = 'certificate-print-zone', filename = 'Certificate.jpg') {
+    const canvas = await captureCertificateCanvas(elementId);
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas render was empty');
+    }
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                reject(new Error('Failed to create JPG blob from canvas'));
+                return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            resolve({ success: true });
+        }, 'image/jpeg', 0.96);
+    });
+}
+
+/**
+ * Generate standard clean filename for certificate
+ */
+export function generatePDFFilename(data, ext = 'pdf') {
+    if (!data || !data.rollNo || !data.name) {
+        return `Certificate.${ext}`;
+    }
     const cleanName = data.name
         .trim()
         .replace(/[^a-zA-Z0-9\s]/g, '')
         .replace(/\s+/g, '_');
-
-    return `Certificate_${data.rollNo}_${cleanName}.pdf`;
+    return `Certificate_${data.rollNo}_${cleanName}.${ext}`;
 }

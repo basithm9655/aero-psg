@@ -5,3 +5,4 @@ DEPLOY.md
 *.local
 .DS_Store
 Thumbs.db
+*.deb
