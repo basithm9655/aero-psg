@@ -88,5 +88,27 @@ export async function fetchCertificateData(rollNo) {
         console.warn("Cadet attendance check error:", err.message);
     }
 
+    // 3. Check Google Apps Script / Sheet Archive Endpoint
+    try {
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAkDBvojbxbRul99ETqa_7nk3Z9K8szZo_YLVMXIjcr-AoP-rQO3DAEtzcXfFiZa_g/exec';
+        const res = await fetch(`${SCRIPT_URL}?rollNo=${encodeURIComponent(cleanRoll)}`);
+        if (res.ok) {
+            const json = await res.json();
+            if (json && json.success && json.data && json.data.name) {
+                return {
+                    name: json.data.name,
+                    rollNo: json.data.rollNo || cleanRoll,
+                    phone: json.data.phone || '',
+                    year: json.data.year || '4th',
+                    dept: json.data.dept || 'Aerospace Engineering',
+                    place: formatRankTitle(json.data.place),
+                    event: json.data.event || 'FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026'
+                };
+            }
+        }
+    } catch (e) {
+        // Fallback network error ignored
+    }
+
     throw new Error(`Cadet ${cleanRoll} is not found in the verified event roster. Please ensure registration at the Cadet Entry Portal.`);
 }
