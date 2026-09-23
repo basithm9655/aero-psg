@@ -478,13 +478,16 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                     prizes: adminLive.prizes || "Cash Pool + Merit Certificates",
                     tagline: adminLive.tagline || "Where Curiosity Defies Gravity",
                     image: adminLive.photo || adminLive.image || "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800",
-                    phase: adminLive.phase || "LAUNCH WINDOW OPEN",
+                    phase: adminLive.phase || "REGISTRATION CLOSED",
+                    registrationEnabled: adminLive.registrationEnabled === true,
                     certificateTitle: adminLive.certificateTitle || adminLive.title
                 };
             }
         }
         return getLiveEvent();
     }, [publishedContent]);
+
+    const isRegistrationClosed = liveEvent.registrationEnabled === false;
 
     const rawTitle = liveEvent.title || "Flight & Propulsion Systems";
     const titleColonIdx = rawTitle.indexOf(':');
@@ -605,9 +608,22 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                     <button
                         onClick={() => { action(); setShowReg(true); }}
                         onMouseEnter={interact}
-                        className="flex px-2.5 sm:px-5 py-2 sm:py-2.5 bg-[#00f0ff] text-black font-bold text-[11px] sm:text-xs font-mono-tech tracking-wider sm:tracking-widest clip-tech hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] items-center gap-1 active:scale-95"
+                        className={isRegistrationClosed
+                            ? "flex px-2.5 sm:px-4 py-2 sm:py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/40 text-rose-400 font-bold text-[11px] sm:text-xs font-mono-tech tracking-wider clip-tech transition-all items-center gap-1.5 active:scale-95 shadow-[0_0_15px_rgba(244,63,94,0.15)]"
+                            : "flex px-2.5 sm:px-5 py-2 sm:py-2.5 bg-[#00f0ff] text-black font-bold text-[11px] sm:text-xs font-mono-tech tracking-wider sm:tracking-widest clip-tech hover:bg-white transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] items-center gap-1 active:scale-95"
+                        }
+                        title={isRegistrationClosed ? "Registrations Closed - Look Up Boarding Pass" : "Register as Cadet"}
                     >
-                        <Target size={13} className="flex-shrink-0" /> <span className="hidden xs:inline">CADET</span> <span>JOIN</span>
+                        {isRegistrationClosed ? (
+                            <>
+                                <Lock size={12} className="flex-shrink-0 text-rose-400" />
+                                <span>REG CLOSED</span>
+                            </>
+                        ) : (
+                            <>
+                                <Target size={13} className="flex-shrink-0" /> <span className="hidden xs:inline">CADET</span> <span>JOIN</span>
+                            </>
+                        )}
                     </button>
 
                     {/* Mobile Hamburger Toggle */}
@@ -645,9 +661,13 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
 
                         <button
                             onClick={() => { action(); setShowReg(true); setMobileMenu(false); }}
-                            className="w-full py-4 bg-[#00f0ff] text-black font-bold text-sm tracking-widest clip-tech active:scale-95 mt-4 flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(0,240,255,0.5)]"
+                            className={isRegistrationClosed
+                                ? "w-full py-3.5 bg-rose-500/15 border border-rose-500/40 text-rose-400 font-bold text-sm tracking-widest clip-tech active:scale-95 mt-4 flex items-center justify-center gap-2"
+                                : "w-full py-4 bg-[#00f0ff] text-black font-bold text-sm tracking-widest clip-tech active:scale-95 mt-4 flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(0,240,255,0.5)]"
+                            }
                         >
-                            <Target size={18} /> INITIATE CADET REGISTRATION
+                            {isRegistrationClosed ? <Lock size={18} /> : <Target size={18} />}
+                            {isRegistrationClosed ? "REGISTRATION CLOSED (PASS LOOKUP)" : "INITIATE CADET REGISTRATION"}
                         </button>
                     </div>
 
@@ -726,20 +746,32 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
 
                         {/* Dynamic Countdown Unit */}
                         <div className="pt-1 max-w-md lg:max-w-md w-full">
-                            <CountdownWidget targetDate={liveEvent.eventDate} />
+                            <CountdownWidget targetDate={liveEvent.eventDate} registrationClosed={isRegistrationClosed} />
                         </div>
 
                         {/* Primary Call to Action & More Details Buttons */}
                         <div className="pt-1 flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3.5 w-full max-w-2xl lg:max-w-none">
-                            {/* Register Button */}
-                            <button
-                                onClick={() => { action(); setShowReg(true); }}
-                                onMouseEnter={interact}
-                                className="px-5 sm:px-8 py-3.5 sm:py-4 bg-[#00f0ff] text-black font-bold font-display text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] clip-tech hover:bg-white transition-all shadow-[0_0_30px_rgba(0,240,255,0.6)] flex items-center justify-center gap-2 group active:scale-95 flex-1 min-w-[140px] sm:flex-initial"
-                            >
-                                <Target size={16} className="group-hover:rotate-45 transition-transform" />
-                                REGISTER NOW
-                            </button>
+                            {/* Register Button or Closed Notice */}
+                            {isRegistrationClosed ? (
+                                <button
+                                    onClick={() => { action(); setShowReg(true); }}
+                                    onMouseEnter={interact}
+                                    className="px-5 sm:px-8 py-3.5 sm:py-4 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/50 text-rose-400 hover:text-white font-bold font-display text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] clip-tech transition-all shadow-[0_0_20px_rgba(244,63,94,0.25)] flex items-center justify-center gap-2 group active:scale-95 flex-1 min-w-[150px] sm:flex-initial"
+                                    title="Registration Closed - Click to look up your Boarding Pass"
+                                >
+                                    <Lock size={16} className="text-rose-400 group-hover:scale-110 transition-transform" />
+                                    <span>REGISTRATION CLOSED</span>
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => { action(); setShowReg(true); }}
+                                    onMouseEnter={interact}
+                                    className="px-5 sm:px-8 py-3.5 sm:py-4 bg-[#00f0ff] text-black font-bold font-display text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] clip-tech hover:bg-white transition-all shadow-[0_0_30px_rgba(0,240,255,0.6)] flex items-center justify-center gap-2 group active:scale-95 flex-1 min-w-[140px] sm:flex-initial"
+                                >
+                                    <Target size={16} className="group-hover:rotate-45 transition-transform" />
+                                    REGISTER NOW
+                                </button>
+                            )}
 
                             {/* More Details Button - Opens Complete Mission Detail Modal */}
                             <button
@@ -1140,6 +1172,8 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                     onClose={() => setShowReg(false)}
                     soundOn={soundOn}
                     playSfx={playSfx}
+                    isRegistrationClosed={isRegistrationClosed}
+                    eventTitle={liveEvent.title}
                 />
             )}
 
@@ -1218,8 +1252,20 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                                         <Target size={16} /> REGISTER FOR MISSION
                                     </button>
                                 ) : (
-                                    <div className="flex-1 py-3 text-center bg-gray-900 border border-gray-800 text-gray-400 text-xs font-mono-tech rounded">
-                                        MISSION COMPLETED / REGISTRATION CLOSED
+                                    <div className="flex-1 flex flex-col xs:flex-row gap-2">
+                                        <div className="flex-1 py-3 px-3 text-center bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono-tech rounded flex items-center justify-center gap-1.5 font-bold">
+                                            <Lock size={13} /> REGISTRATION CLOSED
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                if (soundOn) playSfx('click');
+                                                setSelectedEvent(null);
+                                                setShowReg(true);
+                                            }}
+                                            className="px-4 py-3 bg-[#00f0ff]/15 hover:bg-[#00f0ff]/25 border border-[#00f0ff]/40 text-[#00f0ff] font-mono-tech text-xs tracking-wider rounded"
+                                        >
+                                            LOOKUP PASS
+                                        </button>
                                     </div>
                                 )}
                                 <button
@@ -1372,7 +1418,7 @@ function AerospaceOrbiterHUD({ mousePos, soundOn }) {
 
 
 /* --- COUNTDOWN TIMER WIDGET --- */
-function CountdownWidget({ targetDate }) {
+function CountdownWidget({ targetDate, registrationClosed = false }) {
     const [timeLeft, setTimeLeft] = useState({ days: 14, hours: 8, minutes: 22, seconds: 45 });
 
     useEffect(() => {
@@ -1419,9 +1465,15 @@ function CountdownWidget({ targetDate }) {
                     <Radar size={14} className="animate-spin-slow" />
                     <span className="text-[10px] font-mono-tech tracking-[0.2em] font-bold">IGNITION COUNTDOWN</span>
                 </div>
-                <div className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono-tech font-bold animate-pulse">
-                    ● LAUNCH WINDOW OPEN
-                </div>
+                {registrationClosed ? (
+                    <div className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[9px] font-mono-tech font-bold flex items-center gap-1">
+                        <Lock size={10} /> REGISTRATION CLOSED
+                    </div>
+                ) : (
+                    <div className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono-tech font-bold animate-pulse">
+                        ● LAUNCH WINDOW OPEN
+                    </div>
+                )}
             </div>
             <div className="flex justify-between gap-2 max-w-md">
                 <TimeUnit value={timeLeft.days} label="DAYS" />
@@ -1627,7 +1679,7 @@ function CertificateVault({ soundOn, playSfx }) {
 }
 
 /* --- REGISTRATION MODAL WITH DIGITAL BOARDING PASS --- */
-function RegistrationModal({ onClose, soundOn, playSfx }) {
+function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = false, eventTitle = "Flight & Propulsion Systems" }) {
     const [step, setStep] = useState(1);
     const [rollInput, setRollInput] = useState("");
     const [nameInput, setNameInput] = useState("");
@@ -1635,6 +1687,7 @@ function RegistrationModal({ onClose, soundOn, playSfx }) {
     const [data, setData] = useState(null);
     const [regError, setRegError] = useState("");
     const [existingCadet, setExistingCadet] = useState(null);
+    const [isLookingUp, setIsLookingUp] = useState(false);
 
     // Instant Department and Year parser as student types
     const parsedMeta = useMemo(() => {
@@ -1675,8 +1728,42 @@ function RegistrationModal({ onClose, soundOn, playSfx }) {
         return { year, dept, degree };
     }, [rollInput]);
 
+    // Handle looking up an existing boarding pass when registration is closed
+    const handleLookup = async (e) => {
+        if (e) e.preventDefault();
+        if (soundOn) playSfx('click');
+        setRegError("");
+        const cleanRoll = rollInput.trim().toUpperCase();
+        if (!cleanRoll) {
+            setRegError("Please enter your PSG Tech Roll Number.");
+            return;
+        }
+
+        setIsLookingUp(true);
+        try {
+            const existing = await getCadetByRoll(cleanRoll);
+            if (existing) {
+                setData(existing);
+                if (soundOn) playSfx('success');
+                setStep(3);
+            } else {
+                if (soundOn) playSfx('denied');
+                setRegError(`NO CADET RECORD FOUND: Roll number "${cleanRoll}" is not found in the verified attendee roster. Because registrations are officially closed, new enrollments cannot be accepted.`);
+            }
+        } catch (err) {
+            console.error("Lookup error:", err);
+            setRegError("Error verifying registry. Please check your internet connection.");
+            if (soundOn) playSfx('denied');
+        } finally {
+            setIsLookingUp(false);
+        }
+    };
+
     const handleRegister = async (e) => {
         e.preventDefault();
+        if (isRegistrationClosed) {
+            return handleLookup(e);
+        }
         if (soundOn) playSfx('click');
         setRegError("");
         setExistingCadet(null);
@@ -1737,7 +1824,79 @@ function RegistrationModal({ onClose, soundOn, playSfx }) {
                     <X size={20} />
                 </button>
 
-                {step === 1 && (
+                {step === 1 && isRegistrationClosed ? (
+                    <form onSubmit={handleLookup} className="space-y-4">
+                        <div className="flex items-center gap-2.5 sm:gap-3 mb-2 pr-8 sm:pr-0">
+                            <div className="w-10 h-10 rounded bg-rose-500/15 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0">
+                                <Lock size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg sm:text-xl font-display font-bold text-white leading-tight">REGISTRATION CLOSED</h3>
+                                <p className="text-[9px] sm:text-[10px] font-mono-tech text-rose-400">DSDAEA // PASS RETRIEVAL & VERIFICATION</p>
+                            </div>
+                        </div>
+
+                        {/* Prominent Closed Notice Banner */}
+                        <div className="p-3.5 bg-rose-950/50 border border-rose-500/40 rounded text-xs font-mono-tech text-gray-300 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-rose-400 font-bold uppercase tracking-wider text-[11px]">
+                                <AlertTriangle size={14} /> ADMISSIONS CLOSED FOR THIS MISSION
+                            </div>
+                            <p className="text-[11px] leading-relaxed text-gray-300">
+                                Registrations for <span className="text-white font-bold">{eventTitle}</span> are officially closed. Seat capacity has been reached and new submissions cannot be processed.
+                            </p>
+                            <p className="text-[10.5px] text-[#00f0ff] pt-0.5">
+                                ● If you previously registered, enter your PSG Tech Roll Number below to retrieve your official Cadet Boarding Pass.
+                            </p>
+                        </div>
+
+                        {regError && (
+                            <div className="p-3 bg-red-950/70 border border-red-500/50 rounded text-xs font-mono-tech text-red-300 space-y-1.5">
+                                <div className="flex items-center gap-2 text-red-400 font-bold">
+                                    <AlertTriangle size={14} /> NOTICE
+                                </div>
+                                <p className="text-[11px] leading-relaxed">{regError}</p>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="text-[10px] font-mono-tech text-[#00f0ff] block mb-1">
+                                PSG TECH ROLL NUMBER
+                            </label>
+                            <input
+                                required
+                                autoCapitalize="characters"
+                                autoCorrect="off"
+                                spellCheck="false"
+                                value={rollInput}
+                                onChange={e => { setRollInput(e.target.value.toUpperCase()); setRegError(""); }}
+                                className="w-full bg-black/60 border border-gray-700 p-3 text-white font-mono-tech text-base sm:text-sm rounded focus:border-[#00f0ff] outline-none uppercase tracking-wider"
+                                placeholder="E.g. 25U201"
+                            />
+                        </div>
+
+                        {parsedMeta && (
+                            <div className="p-2.5 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded text-xs font-mono-tech text-gray-300 space-y-0.5">
+                                <div className="text-[#00f0ff] text-[10px] font-bold">MATCHED CADET PROFILE:</div>
+                                <div>Branch: <b className="text-white">{parsedMeta.dept}</b> ({parsedMeta.degree})</div>
+                                <div>Academic Year: <b className="text-white">{parsedMeta.year}</b></div>
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={isLookingUp}
+                            className="w-full py-4 bg-[#00f0ff] hover:bg-white text-black font-bold font-display tracking-widest text-xs uppercase clip-tech transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] mt-2 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                        >
+                            {isLookingUp ? (
+                                <span>VERIFYING REGISTRY...</span>
+                            ) : (
+                                <>
+                                    <Check size={15} /> RETRIEVE CADET BOARDING PASS
+                                </>
+                            )}
+                        </button>
+                    </form>
+                ) : step === 1 && !isRegistrationClosed ? (
                     <form onSubmit={handleRegister} className="space-y-3.5 sm:space-y-4">
                         <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4 pr-8 sm:pr-0">
                             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-[#00f0ff]/15 border border-[#00f0ff]/40 flex items-center justify-center text-[#00f0ff] flex-shrink-0">
@@ -1828,7 +1987,7 @@ function RegistrationModal({ onClose, soundOn, playSfx }) {
                             TRANSMIT CADET ENTRY
                         </button>
                     </form>
-                )}
+                ) : null}
 
                 {step === 2 && (
                     <div className="text-center py-12 space-y-3">

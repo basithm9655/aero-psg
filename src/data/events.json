@@ -13,7 +13,7 @@
     "hall": "Room 406",
     "building": "G-Block",
     "details": "Flagship Technical Workshop on Flight & Propulsion Systems hosted by Dr. Satish Dhawan Aerospace Engineering Association (DSDAEA) at PSG College of Technology. In-depth masterclass exploring the Principles of Flight (Lift, Weight, Thrust, Drag) and Aerospace Propulsion Evolution from early Rotary Piston Engines and Turboprops to Turbojets, Ramjets, and Mach 5+ Scramjets.",
-    "registrationEnabled": true,
+    "registrationEnabled": false,
     "capacity": 120,
     "prizes": "Official DSDAEA Technical Certification & Aero Kit",
     "tagline": "Four Forces • One Balance • Sustained Flight",
@@ -22,7 +22,7 @@
     "instagram": "@aero_psg_tech",
     "certificateTitle": "FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026",
     "image": "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800",
-    "phase": "REGISTRATION OPEN"
+    "phase": "REGISTRATION CLOSED"
   },
   {
     "id": "event-horizon-cup-2026",
@@ -38,7 +38,7 @@
     "hall": "",
     "building": "",
     "details": "Premier Aerospace Olympiad and Quiz competition organized by DSDAEA. Tests conceptual aerospace acumen across aerodynamics, orbital mechanics, astronomy, space exploration history, rocketry, and satellite systems. Challenge your peers and prove your flight science expertise.",
-    "registrationEnabled": true,
+    "registrationEnabled": false,
     "capacity": 100,
     "prizes": "Merit Trophies, Cash Awards & Certificates",
     "tagline": "Defy Limits, Conquer the Skies",
@@ -63,7 +63,7 @@
     "hall": "",
     "building": "",
     "details": "Aerospace Computer-Aided Design (CAD) modeling competition and workshop. Participants engineer 3D parametric models of supersonic aerodynamic airfoils, UAV fuselages, rocket nozzle contours, and structural aerospace assemblies.",
-    "registrationEnabled": true,
+    "registrationEnabled": false,
     "capacity": 80,
     "prizes": "Design Excellence Trophies & Merit Certificates",
     "tagline": "Precision Drafting for the Skies",
