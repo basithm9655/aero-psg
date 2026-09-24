@@ -395,6 +395,24 @@
     text-align: center;
 }
 
+.cert-sig-img-container {
+    height: 48px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.cert-sig-image {
+    max-height: 48px;
+    max-width: 185px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
 .cert-signature-script {
     font-family: 'Alex Brush', cursive;
     font-size: 34px;

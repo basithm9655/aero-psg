@@ -113,7 +113,14 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
                 <div className="cert-footer-section">
                     {/* Faculty Advisor */}
                     <div className="cert-sig-block">
-                        <div className="cert-signature-script">Dr. Vasanth Raj D</div>
+                        <div className="cert-sig-img-container">
+                            <img
+                                src="/FAsign.png"
+                                alt="Faculty Advisor Signature"
+                                className="cert-sig-image"
+                                crossOrigin="anonymous"
+                            />
+                        </div>
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-name">Dr. Vasanth Raj D</div>
                         <div className="cert-sig-desig">Assistant Professor (Sr. Gr.)</div>
@@ -136,7 +143,14 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
 
                     {/* Secretary */}
                     <div className="cert-sig-block">
-                        <div className="cert-signature-script">Mohammed Rahil</div>
+                        <div className="cert-sig-img-container">
+                            <img
+                                src="/secsign.png"
+                                alt="Secretary Signature"
+                                className="cert-sig-image"
+                                crossOrigin="anonymous"
+                            />
+                        </div>
                         <div className="cert-sig-line"></div>
                         <div className="cert-sig-name">Mohammed Rahil</div>
                         <div className="cert-sig-desig">Secretary, DSDAEA</div>
