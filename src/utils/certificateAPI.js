@@ -3,6 +3,35 @@ import { fetchCertificateFromDb, getCadetByRoll } from '../firebase.js';
 // Certificate verification helper functions
 
 /**
+ * Format student name for certificate display:
+ * Always capitalize the first letter and keep the rest in lowercase (Title Case).
+ * Preserves initials (e.g. "P", "M", "P.R.", etc.).
+ */
+export function formatCertificateName(name) {
+    if (!name || typeof name !== 'string') return "Aerospace Cadet";
+    const trimmed = name.trim();
+    if (!trimmed) return "Aerospace Cadet";
+
+    return trimmed
+        .split(/\s+/)
+        .map(word => {
+            if (word.includes('.')) {
+                return word
+                    .split('.')
+                    .map(part => {
+                        if (!part) return '';
+                        if (part.length === 1) return part.toUpperCase();
+                        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+                    })
+                    .join('.');
+            }
+            if (word.length === 1) return word.toUpperCase();
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(' ');
+}
+
+/**
  * Helper to normalize award / rank title
  */
 export function formatRankTitle(place) {
@@ -47,6 +76,7 @@ export async function fetchCertificateData(rollNo) {
         if (cloudCert && cloudCert.name && cloudCert.rollNo) {
             return {
                 ...cloudCert,
+                name: formatCertificateName(cloudCert.name),
                 place: formatRankTitle(cloudCert.place)
             };
         }
@@ -63,7 +93,7 @@ export async function fetchCertificateData(rollNo) {
             // If student registered but admin has NOT marked attendance:
             if (!isPresent) {
                 throw new Error(
-                    `ATTENDANCE UNVERIFIED: Cadet ${cadet.name} (${cleanRoll}) is registered, but event attendance has not been verified by Mission Control. Certificates are only issued to cadets who attended.`
+                    `ATTENDANCE UNVERIFIED: Cadet ${formatCertificateName(cadet.name)} (${cleanRoll}) is registered, but event attendance has not been verified by Mission Control. Certificates are only issued to cadets who attended.`
                 );
             }
 
@@ -71,7 +101,7 @@ export async function fetchCertificateData(rollNo) {
             const rankText = formatRankTitle(cadet.place);
 
             return {
-                name: cadet.name,
+                name: formatCertificateName(cadet.name),
                 rollNo: cleanRoll,
                 phone: cadet.phone || '',
                 year: cadet.year || '4th',
@@ -96,7 +126,7 @@ export async function fetchCertificateData(rollNo) {
             const json = await res.json();
             if (json && json.success && json.data && json.data.name) {
                 return {
-                    name: json.data.name,
+                    name: formatCertificateName(json.data.name),
                     rollNo: json.data.rollNo || cleanRoll,
                     phone: json.data.phone || '',
                     year: json.data.year || '4th',

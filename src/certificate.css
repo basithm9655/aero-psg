@@ -303,11 +303,18 @@
 
 .cert-recipient-name {
     font-family: 'Pinyon Script', cursive;
-    font-size: 68px;
-    line-height: 1.1;
+    font-size: 56px;
+    line-height: 1.15;
     color: #001F3F;
-    margin: 1px 0 0 0;
+    margin: 2px 0 0 0;
     font-weight: 400;
+    text-transform: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .cert-name-underline {
@@ -315,7 +322,7 @@
     align-items: center;
     justify-content: center;
     width: 320px;
-    margin: 0 auto 5px auto;
+    margin: 4px auto 6px auto;
     gap: 8px;
 }
 
@@ -396,16 +403,16 @@
 }
 
 .cert-sig-img-container {
-    height: 48px;
+    height: 52px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .cert-sig-image {
-    max-height: 48px;
-    max-width: 185px;
+    max-height: 50px;
+    max-width: 180px;
     width: auto;
     height: auto;
     object-fit: contain;

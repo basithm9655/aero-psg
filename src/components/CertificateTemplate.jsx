@@ -1,5 +1,6 @@
 import React from 'react';
 import '../certificate.css';
+import { formatCertificateName } from '../utils/certificateAPI';
 
 /**
  * Regal Aerospace Certificate Template
@@ -30,6 +31,24 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
     }
 
     const verificationHash = `DSDAEA-2026-${(data.rollNo || "CADET").toUpperCase()}-VERIFIED`;
+
+    // Format recipient name strictly in Title Case and compute dynamic responsive font size
+    const formattedName = formatCertificateName(data.name);
+    const nameLength = formattedName.length;
+
+    // Adaptive typography scaling: guarantees single-line fit without text collision or line breaks
+    let nameFontSize = '56px';
+    if (nameLength > 36) {
+        nameFontSize = '32px';
+    } else if (nameLength > 30) {
+        nameFontSize = '38px';
+    } else if (nameLength > 24) {
+        nameFontSize = '44px';
+    } else if (nameLength > 18) {
+        nameFontSize = '50px';
+    } else {
+        nameFontSize = '56px';
+    }
 
     return (
         <div className="certificate-wrapper">
@@ -84,8 +103,14 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
                 <div className="cert-body-section">
                     <p className="cert-conferral-note">This certificate of honor is proudly conferred upon</p>
 
-                    <div className="cert-recipient-name">
-                        {data.name || "Aerospace Cadet"}
+                    <div
+                        className="cert-recipient-name"
+                        style={{
+                            fontSize: nameFontSize,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {formattedName}
                     </div>
 
                     <div className="cert-name-underline">

@@ -1494,6 +1494,8 @@ function CertificateVault({ soundOn, playSfx }) {
     const [state, setState] = useState("IDLE"); // IDLE, SCAN, FOUND, ERROR
     const [certificateData, setCertificateData] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const [generatingStatus, setGeneratingStatus] = useState(null); // null, 'pdf', 'jpg'
+    const [progressPercent, setProgressPercent] = useState(0);
 
     const search = async (overrideRoll) => {
         const query = (overrideRoll || roll).trim().toUpperCase();
@@ -1518,31 +1520,47 @@ function CertificateVault({ soundOn, playSfx }) {
     };
 
     const handleDownloadJPG = async () => {
+        if (generatingStatus) return;
         if (soundOn) playSfx('click');
+        setGeneratingStatus('jpg');
+        setProgressPercent(15);
         try {
             const { generateCertificateJPG } = await import('./utils/pdfGenerator');
             const cleanName = certificateData.name?.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') || 'Cadet';
             const filename = `DSDAEA_Certificate_${certificateData.rollNo}_${cleanName}.jpg`;
-            await generateCertificateJPG('certificate-print-zone', filename);
+            await generateCertificateJPG('certificate-print-zone', filename, (pct) => setProgressPercent(pct));
             if (soundOn) playSfx('success');
         } catch (error) {
             console.error('Error downloading JPG certificate:', error);
             alert('Could not download image. Try PDF format.');
             if (soundOn) playSfx('denied');
+        } finally {
+            setTimeout(() => {
+                setGeneratingStatus(null);
+                setProgressPercent(0);
+            }, 600);
         }
     };
 
     const handlePrint = async () => {
+        if (generatingStatus) return;
         if (soundOn) playSfx('click');
+        setGeneratingStatus('pdf');
+        setProgressPercent(15);
         try {
             const { generateCertificatePDF, generatePDFFilename } = await import('./utils/pdfGenerator');
             const filename = generatePDFFilename(certificateData);
-            await generateCertificatePDF('certificate-print-zone', filename);
+            await generateCertificatePDF('certificate-print-zone', filename, (pct) => setProgressPercent(pct));
             if (soundOn) playSfx('success');
         } catch (error) {
             console.error('PDF generation error:', error);
             alert('PDF generation error. Please try again.');
             if (soundOn) playSfx('denied');
+        } finally {
+            setTimeout(() => {
+                setGeneratingStatus(null);
+                setProgressPercent(0);
+            }, 600);
         }
     };
 
@@ -1551,10 +1569,83 @@ function CertificateVault({ soundOn, playSfx }) {
         setRoll("");
         setCertificateData(null);
         setErrorMessage("");
+        setGeneratingStatus(null);
+        setProgressPercent(0);
     };
 
     return (
         <div className="max-w-4xl mx-auto w-full relative">
+            {/* Aerospace HUD Loading Overlay for Mobile & Desktop */}
+            {generatingStatus && (
+                <div className="fixed inset-0 z-[1000000] bg-black/92 backdrop-blur-md flex items-center justify-center p-4 select-none">
+                    <div className="w-full max-w-md bg-[#000d1a]/95 border border-[#00f0ff]/50 rounded-xl p-6 sm:p-8 shadow-[0_0_50px_rgba(0,240,255,0.35)] relative overflow-hidden text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                        {/* Top scanning cyan line */}
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent animate-pulse" />
+
+                        {/* High-Tech Radar Scanning Reticle */}
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto flex items-center justify-center">
+                            {/* Outer dashed spinning ring */}
+                            <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#00f0ff]/30 animate-[spin_8s_linear_infinite]" />
+                            {/* Intermediate pulsing border */}
+                            <div className="absolute inset-2 rounded-full border border-[#00f0ff]/50 animate-ping opacity-25" />
+                            {/* Inner cyber core */}
+                            <div className="w-14 h-14 rounded-full bg-[#00f0ff]/15 border-2 border-[#00f0ff] flex items-center justify-center text-[#00f0ff] shadow-[0_0_25px_rgba(0,240,255,0.6)]">
+                                <Radar className="w-7 h-7 animate-spin" style={{ animationDuration: '2.5s' }} />
+                            </div>
+                        </div>
+
+                        {/* Title & Status */}
+                        <div className="space-y-1.5">
+                            <div className="text-[10px] font-mono-tech tracking-[0.3em] text-[#00f0ff] uppercase flex items-center justify-center gap-1.5">
+                                <Shield size={13} className="text-[#00f0ff]" /> AIR CREDENTIAL PIPELINE // ACTIVE
+                            </div>
+                            <h3 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wider">
+                                {generatingStatus === 'pdf' ? 'COMPILING OFFICIAL PDF' : 'RASTERIZING HIGH-RES JPG'}
+                            </h3>
+                            <p className="text-xs text-gray-400 font-mono-tech max-w-xs mx-auto">
+                                {generatingStatus === 'pdf'
+                                    ? 'Synthesizing 300 DPI vector typography & institutional seals...'
+                                    : 'Rendering ultra-sharp image asset for immediate device saving...'}
+                            </p>
+                        </div>
+
+                        {/* Cadet Credential Details Badge */}
+                        {certificateData && (
+                            <div className="bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded-lg p-3 text-left font-mono-tech text-xs space-y-1">
+                                <div className="flex justify-between items-center text-[#00f0ff] font-bold text-xs sm:text-sm">
+                                    <span className="truncate">{certificateData.name}</span>
+                                    <span className="text-[10px] px-2 py-0.5 bg-[#00f0ff]/20 rounded border border-[#00f0ff]/40">VERIFIED</span>
+                                </div>
+                                <div className="text-[11px] text-gray-300">
+                                    ROLL: <b className="text-white">{certificateData.rollNo}</b> • DEPT: {certificateData.dept || "Aerospace"}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Progress Bar & Telemetry */}
+                        <div className="space-y-2 text-left">
+                            <div className="flex justify-between text-[11px] font-mono-tech text-[#00f0ff]">
+                                <span className="flex items-center gap-1.5">
+                                    <Activity size={12} className="animate-pulse" />
+                                    {progressPercent < 40 ? 'ACQUIRING ASSETS...' : progressPercent < 80 ? 'RENDERING SECURITY CRESTS...' : progressPercent < 98 ? 'EMBEDDING VERIFICATION HASH...' : 'DISPATCHING FILE...'}
+                                </span>
+                                <span className="font-bold">{progressPercent}%</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-black/80 rounded-full overflow-hidden border border-[#00f0ff]/40 p-[1px]">
+                                <div
+                                    className="h-full bg-gradient-to-r from-[#00b4d8] via-[#00f0ff] to-[#90e0ef] rounded-full transition-all duration-200 shadow-[0_0_12px_#00f0ff]"
+                                    style={{ width: `${Math.max(8, progressPercent)}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="text-[9.5px] text-gray-500 font-mono-tech uppercase tracking-widest pt-1">
+                            PLEASE WAIT • DOWNLOADING DIRECTLY TO MOBILE STORAGE
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="hud-box p-4 sm:p-8 md:p-12 rounded-lg border-t-2 border-t-[#00f0ff] relative overflow-hidden">
                 <div className="text-center mb-6 sm:mb-8">
                     <div className="text-[#00f0ff] text-[9.5px] sm:text-[10px] font-mono-tech tracking-[0.25em] sm:tracking-[0.3em] uppercase mb-1 flex items-center justify-center gap-2">
@@ -1616,19 +1707,26 @@ function CertificateVault({ soundOn, playSfx }) {
                             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                                 <button
                                     onClick={handlePrint}
-                                    className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95"
+                                    disabled={!!generatingStatus}
+                                    className={`flex-1 sm:flex-initial px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95 transition-all ${
+                                        generatingStatus ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 >
                                     <Download size={14} /> OFFICIAL PDF
                                 </button>
                                 <button
                                     onClick={handleDownloadJPG}
-                                    className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-[#00f0ff] hover:bg-white text-black font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95"
+                                    disabled={!!generatingStatus}
+                                    className={`flex-1 sm:flex-initial px-3.5 py-2.5 bg-[#00f0ff] hover:bg-white text-black font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95 transition-all ${
+                                        generatingStatus ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 >
                                     <FileText size={14} /> HIGH-RES JPG
                                 </button>
                                 <button
                                     onClick={reset}
-                                    className="px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono-tech text-xs rounded active:scale-95"
+                                    disabled={!!generatingStatus}
+                                    className="px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono-tech text-xs rounded active:scale-95 transition-all"
                                 >
                                     NEW
                                 </button>

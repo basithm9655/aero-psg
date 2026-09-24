@@ -1,6 +1,7 @@
 /**
  * High-Precision Certificate Exporter (PDF & JPG) - DSDAEA PSG TECH
  * Produces 300 DPI high-fidelity A4 landscape output via jsPDF + html2canvas
+ * Optimized for lightning-fast mobile generation with zero-flash rendering.
  */
 
 /**
@@ -16,12 +17,7 @@ async function waitForImagesAndFonts(element) {
             promises.push(
                 new Promise((resolve) => {
                     img.onload = resolve;
-                    img.onerror = resolve; // Continue even if an image fails
-                    if (img.src && !img.complete) {
-                        const src = img.src;
-                        img.src = '';
-                        img.src = src;
-                    }
+                    img.onerror = resolve; // Non-blocking: continue even if an image fails
                 })
             );
         } else if (img.decode) {
@@ -29,33 +25,38 @@ async function waitForImagesAndFonts(element) {
         }
     }
 
-    await Promise.all(promises);
+    // Safety timeout: max 1200ms for images to avoid freezing mobile generation
+    const imgTimeout = new Promise((resolve) => setTimeout(resolve, 1200));
+    await Promise.race([Promise.all(promises), imgTimeout]);
 
     if (document.fonts) {
-        await document.fonts.ready;
         try {
-            await Promise.all([
-                document.fonts.load('800 40px "Cinzel"'),
-                document.fonts.load('800 40px "Cinzel Decorative"'),
-                document.fonts.load('400 68px "Pinyon Script"'),
-                document.fonts.load('400 34px "Alex Brush"'),
-                document.fonts.load('700 14px "Playfair Display"'),
-                document.fonts.load('600 10px "Montserrat"')
+            await Promise.race([
+                Promise.all([
+                    document.fonts.load('800 40px "Cinzel"'),
+                    document.fonts.load('800 40px "Cinzel Decorative"'),
+                    document.fonts.load('400 40px "Pinyon Script"'),
+                    document.fonts.load('700 14px "Playfair Display"'),
+                    document.fonts.load('600 10px "Montserrat"')
+                ]),
+                new Promise((resolve) => setTimeout(resolve, 600))
             ]);
         } catch (e) {
             // Non-blocking fallback
         }
     }
 
-    // Safety settling interval for canvas rasterizer
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    // Ultra-short layout stabilization pause
+    await new Promise((resolve) => setTimeout(resolve, 80));
 }
 
 /**
- * Capture an element at exact 1122px x 794px with 2x resolution
+ * Capture an element at exact 1122px x 794px with 2x resolution (2244x1588px)
  */
-async function captureCertificateCanvas(elementId) {
+async function captureCertificateCanvas(elementId, onProgress) {
+    if (onProgress) onProgress(20);
     const { default: html2canvas } = await import('html2canvas');
+    if (onProgress) onProgress(35);
 
     const element = document.getElementById(elementId);
     if (!element) {
@@ -76,20 +77,21 @@ async function captureCertificateCanvas(elementId) {
         transform: element.style.transform,
     };
 
-    // Temporarily bring the element to top-left for flawless capture
+    // Position behind the full-screen loading HUD (z-index 1000000) so no visual flashing occurs
     element.style.display = 'block';
     element.style.position = 'fixed';
     element.style.left = '0px';
     element.style.top = '0px';
     element.style.opacity = '1';
     element.style.visibility = 'visible';
-    element.style.zIndex = '999999';
+    element.style.zIndex = '99999';
     element.style.width = '1122px';
     element.style.height = '794px';
     element.style.transform = 'none';
 
     try {
         await waitForImagesAndFonts(element);
+        if (onProgress) onProgress(50);
 
         const canvas = await html2canvas(element, {
             scale: 2, // 2x scale: 2244px x 1588px (300 DPI equivalent)
@@ -105,7 +107,7 @@ async function captureCertificateCanvas(elementId) {
             scrollX: 0,
             scrollY: 0,
             logging: false,
-            imageTimeout: 15000,
+            imageTimeout: 8000,
             onclone: (clonedDoc) => {
                 const clonedElement = clonedDoc.getElementById(elementId);
                 if (clonedElement) {
@@ -122,6 +124,7 @@ async function captureCertificateCanvas(elementId) {
             },
         });
 
+        if (onProgress) onProgress(80);
         return canvas;
     } finally {
         // Always restore original styles
@@ -134,14 +137,17 @@ async function captureCertificateCanvas(elementId) {
 /**
  * Generate and download high-resolution PDF certificate
  */
-export async function generateCertificatePDF(elementId = 'certificate-print-zone', filename = 'Certificate.pdf') {
+export async function generateCertificatePDF(elementId = 'certificate-print-zone', filename = 'Certificate.pdf', onProgress) {
+    if (onProgress) onProgress(10);
     const { default: jsPDF } = await import('jspdf');
 
-    const canvas = await captureCertificateCanvas(elementId);
+    const canvas = await captureCertificateCanvas(elementId, onProgress);
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas render was empty');
     }
+
+    if (onProgress) onProgress(88);
 
     const pdf = new jsPDF({
         orientation: 'landscape',
@@ -150,9 +156,12 @@ export async function generateCertificatePDF(elementId = 'certificate-print-zone
         compress: true,
     });
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
     pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+    
+    if (onProgress) onProgress(96);
     pdf.save(filename);
+    if (onProgress) onProgress(100);
 
     return { success: true };
 }
@@ -160,12 +169,15 @@ export async function generateCertificatePDF(elementId = 'certificate-print-zone
 /**
  * Generate and download high-resolution JPG certificate
  */
-export async function generateCertificateJPG(elementId = 'certificate-print-zone', filename = 'Certificate.jpg') {
-    const canvas = await captureCertificateCanvas(elementId);
+export async function generateCertificateJPG(elementId = 'certificate-print-zone', filename = 'Certificate.jpg', onProgress) {
+    if (onProgress) onProgress(10);
+    const canvas = await captureCertificateCanvas(elementId, onProgress);
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
         throw new Error('Canvas render was empty');
     }
+
+    if (onProgress) onProgress(88);
 
     return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -173,6 +185,7 @@ export async function generateCertificateJPG(elementId = 'certificate-print-zone
                 reject(new Error('Failed to create JPG blob from canvas'));
                 return;
             }
+            if (onProgress) onProgress(95);
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -180,9 +193,10 @@ export async function generateCertificateJPG(elementId = 'certificate-print-zone
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
+            if (onProgress) onProgress(100);
             resolve({ success: true });
-        }, 'image/jpeg', 0.96);
+        }, 'image/jpeg', 0.95);
     });
 }
 
