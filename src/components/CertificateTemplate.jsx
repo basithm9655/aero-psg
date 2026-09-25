@@ -32,6 +32,9 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
 
     const verificationHash = `DSDAEA-2026-${(data.rollNo || "CADET").toUpperCase()}-VERIFIED`;
 
+    // Normalize academic year so "4th Year" doesn't produce duplicate "4th Year Year"
+    const cadetYear = (data.year || "4th").replace(/\s*year\s*/gi, '').trim() || "4th";
+
     // Format recipient name strictly in Title Case and compute dynamic responsive font size
     const formattedName = formatCertificateName(data.name);
     const nameLength = formattedName.length;
@@ -120,7 +123,7 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
                     </div>
 
                     <div className="cert-citation-details">
-                        (Roll No: <b>{data.rollNo}</b>), a <b>{data.year || "4th"}</b> Year cadet of the Department of{' '}
+                        (Roll No: <b>{data.rollNo}</b>), a <b>{cadetYear}</b> Year cadet of the Department of{' '}
                         <b>{data.dept || "Aerospace Engineering"}</b>,<br />
                         {citationText}
                     </div>

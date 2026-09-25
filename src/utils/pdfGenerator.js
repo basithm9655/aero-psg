@@ -89,6 +89,14 @@ async function captureCertificateCanvas(elementId, onProgress) {
     element.style.height = '794px';
     element.style.transform = 'none';
 
+    // Critical: Inject img { display: inline-block !important; } so html2canvas's FontMetrics
+    // creates its temporary baseline measurement image inline rather than breaking to a new line
+    // due to Tailwind's preflight img { display: block; }, which shifts rendered text downward.
+    const fontMetricsFixStyle = document.createElement('style');
+    fontMetricsFixStyle.id = 'html2canvas-fontmetrics-baseline-fix';
+    fontMetricsFixStyle.innerHTML = 'img { display: inline-block !important; }';
+    document.head.appendChild(fontMetricsFixStyle);
+
     try {
         await waitForImagesAndFonts(element);
         if (onProgress) onProgress(50);
@@ -109,6 +117,10 @@ async function captureCertificateCanvas(elementId, onProgress) {
             logging: false,
             imageTimeout: 8000,
             onclone: (clonedDoc) => {
+                const clonedFix = clonedDoc.createElement('style');
+                clonedFix.innerHTML = 'img { display: inline-block !important; }';
+                clonedDoc.head.appendChild(clonedFix);
+
                 const clonedElement = clonedDoc.getElementById(elementId);
                 if (clonedElement) {
                     clonedElement.style.display = 'block';
@@ -127,6 +139,7 @@ async function captureCertificateCanvas(elementId, onProgress) {
         if (onProgress) onProgress(80);
         return canvas;
     } finally {
+        fontMetricsFixStyle.remove();
         // Always restore original styles
         Object.keys(prevStyles).forEach((key) => {
             element.style[key] = prevStyles[key];

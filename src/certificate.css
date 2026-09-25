@@ -47,6 +47,10 @@
     print-color-adjust: exact !important;
 }
 
+.certificate-wrapper img {
+    display: inline-block;
+}
+
 /* Translucent Central Institutional Watermark */
 .cert-watermark-wrap {
     position: absolute;
@@ -101,10 +105,10 @@
 /* Inner Dashed Gold Security Filigree */
 .cert-border-inner {
     position: absolute;
-    top: 28px;
-    left: 28px;
-    right: 28px;
-    bottom: 28px;
+    top: 26px;
+    left: 26px;
+    right: 26px;
+    bottom: 24px;
     border: 1px dashed rgba(197, 155, 39, 0.75);
     pointer-events: none;
     z-index: 2;
@@ -155,7 +159,7 @@
     top: 34px;
     left: 45px;
     right: 45px;
-    bottom: 30px;
+    bottom: 34px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -242,18 +246,18 @@
 
 .cert-main-heading {
     font-family: 'Cinzel Decorative', 'Cinzel', serif;
-    font-size: 40px;
-    font-weight: 800;
-    letter-spacing: 12px;
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 10px;
     color: #f3cf55;
     background: linear-gradient(135deg, #001226 0%, #001F3F 50%, #002b56 100%);
     border: 2px solid #c59b27;
     display: inline-block;
-    padding: 8px 64px;
+    padding: 4px 56px 10px 56px;
     border-radius: 2px;
     box-shadow: 0 4px 14px rgba(0, 31, 63, 0.25);
     margin: 0;
-    line-height: 1.1;
+    line-height: 1.15;
     text-transform: uppercase;
 }
 

@@ -33,3 +33,5 @@ yarn-error.log*
 # Unwanted files (screenshots, old files, etc.)
 n/
 *.pdf
+*.jpg
+
