@@ -489,15 +489,18 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
 
     const isRegistrationClosed = liveEvent.registrationEnabled === false;
 
-    const rawTitle = liveEvent.title || "Flight & Propulsion Systems";
+    const rawTitle = liveEvent.title || "Horizon Cup: Olympiad & Quiz";
     const titleColonIdx = rawTitle.indexOf(':');
     const heroTitle = titleColonIdx > -1 ? rawTitle.substring(0, titleColonIdx).trim() : rawTitle.trim();
-    const heroShortType = (liveEvent.type || (titleColonIdx > -1 ? rawTitle.substring(titleColonIdx + 1).trim() : "TECHNICAL WORKSHOP")).toUpperCase();
+    const heroShortType = (liveEvent.type || (titleColonIdx > -1 ? rawTitle.substring(titleColonIdx + 1).trim() : "OLYMPIAD & QUIZ")).toUpperCase();
 
-    // Segment title: "Flight & Propulsion" in white, "Systems" in blue
+    // Segment title: e.g. "Horizon" in white, "Cup" in blue
     let heroPartWhite = heroTitle;
     let heroPartBlue = "";
-    if (heroTitle.toLowerCase().includes("flight & propulsion systems")) {
+    if (heroTitle.toLowerCase().includes("horizon cup")) {
+        heroPartWhite = "Horizon";
+        heroPartBlue = "Cup";
+    } else if (heroTitle.toLowerCase().includes("flight & propulsion")) {
         heroPartWhite = "Flight & Propulsion";
         heroPartBlue = "Systems";
     } else if (heroTitle.lastIndexOf(' ') > -1) {
@@ -1777,11 +1780,12 @@ function CertificateVault({ soundOn, playSfx }) {
 }
 
 /* --- REGISTRATION MODAL WITH DIGITAL BOARDING PASS --- */
-function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = false, eventTitle = "Flight & Propulsion Systems" }) {
+function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = false, eventTitle = "Horizon Cup: Olympiad & Quiz" }) {
     const [step, setStep] = useState(1);
     const [rollInput, setRollInput] = useState("");
     const [nameInput, setNameInput] = useState("");
     const [phoneInput, setPhoneInput] = useState("");
+    const [deptInput, setDeptInput] = useState("");
     const [data, setData] = useState(null);
     const [regError, setRegError] = useState("");
     const [existingCadet, setExistingCadet] = useState(null);
@@ -1815,15 +1819,25 @@ function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = f
             'Y': 'Metallurgical Engineering',
             'P': 'Production Engineering',
             'R': 'Robotics & Automation',
-            'B': 'Bio Technology',
+            'B': 'Biotechnology',
             'I': 'Information Technology',
-            'T': 'Textile Technology'
+            'T': 'Textile Technology',
+            'F': 'Fashion Technology',
+            'G': 'Apparel Technology',
+            'S': 'Mechanical (Sandwich)',
+            'AM': 'Applied Mathematics',
+            'CS': 'Computer Systems & Design',
+            'SS': 'Software Systems',
+            'CY': 'Cyber Security',
+            'DA': 'Data Science',
+            'AE': 'Aerospace Engineering'
         };
 
-        const dept = deptMapping[code] || (code ? 'Aerospace Engineering' : 'Engineering Candidate');
-        const degree = ['B', 'I', 'H', 'T'].includes(code) ? 'B.Tech' : 'B.E.';
+        const isDeptDetected = Boolean(code && deptMapping[code]);
+        const dept = isDeptDetected ? deptMapping[code] : '';
+        const degree = ['B', 'I', 'H', 'T', 'F', 'G'].includes(code) ? 'B.Tech' : 'B.E.';
 
-        return { year, dept, degree };
+        return { year, dept, isDeptDetected, degree };
     }, [rollInput]);
 
     // Handle looking up an existing boarding pass when registration is closed
@@ -1875,6 +1889,13 @@ function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = f
         }
 
         const cleanRoll = rollInput.trim().toUpperCase();
+        const finalDept = (deptInput || (parsedMeta?.isDeptDetected ? parsedMeta.dept : '')).trim();
+        if (!finalDept) {
+            setRegError("Department not auto-detected from roll number. Please specify your Department / Branch.");
+            if (soundOn) playSfx('denied');
+            return;
+        }
+
         setStep(2);
 
         try {
@@ -1894,7 +1915,7 @@ function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = f
                 rollNo: cleanRoll,
                 phone: phoneInput.trim(),
                 year: parsedMeta?.year || '1st Year',
-                dept: parsedMeta?.dept || 'Mechanical Engineering',
+                dept: finalDept,
                 degree: parsedMeta?.degree || 'B.E.',
                 flightCode: `DS-${Math.floor(1000 + Math.random() * 9000)}`
             };
@@ -2069,12 +2090,46 @@ function RegistrationModal({ onClose, soundOn, playSfx, isRegistrationClosed = f
                             />
                         </div>
 
-                        {/* Real-time Department Identification Feedback */}
-                        {parsedMeta && (
+                        <div>
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="text-[10px] font-mono-tech text-[#00f0ff] block">
+                                    DEPARTMENT / BRANCH {rollInput.length >= 3 && !parsedMeta?.isDeptDetected && !deptInput && (
+                                        <span className="text-amber-400 font-bold">(PLEASE SPECIFY)</span>
+                                    )}
+                                </label>
+                                {parsedMeta?.isDeptDetected && !deptInput && (
+                                    <span className="text-[9.5px] font-mono-tech text-emerald-400 flex items-center gap-1">
+                                        <Check size={11} /> Auto-Detected
+                                    </span>
+                                )}
+                            </div>
+                            <input
+                                required
+                                value={deptInput !== "" ? deptInput : (parsedMeta?.isDeptDetected ? parsedMeta.dept : "")}
+                                onChange={e => { setDeptInput(e.target.value); setRegError(""); }}
+                                className={`w-full bg-black/60 border p-3 text-white font-mono-tech text-base sm:text-sm rounded focus:border-[#00f0ff] outline-none transition-all ${
+                                    rollInput.length >= 3 && !parsedMeta?.isDeptDetected && !deptInput
+                                        ? 'border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
+                                        : 'border-gray-700'
+                                }`}
+                                placeholder={parsedMeta?.isDeptDetected ? parsedMeta.dept : "Enter your Department (e.g. Fashion Tech, MCA, etc.)"}
+                            />
+                        </div>
+
+                        {/* Real-time Cadet Identification Summary */}
+                        {rollInput.length >= 3 && (
                             <div className="p-3 bg-[#00f0ff]/10 border border-[#00f0ff]/30 rounded text-xs font-mono-tech text-gray-300 space-y-1">
-                                <div className="text-[#00f0ff] text-[10px] font-bold">AUTOMATIC IDENTIFICATION:</div>
-                                <div>Branch: <b className="text-white">{parsedMeta.dept}</b> ({parsedMeta.degree})</div>
-                                <div>Academic Year: <b className="text-white">{parsedMeta.year}</b></div>
+                                <div className="text-[#00f0ff] text-[10px] font-bold">CADET VERIFICATION:</div>
+                                <div>
+                                    Branch:{' '}
+                                    <b className="text-white">
+                                        {deptInput || (parsedMeta?.isDeptDetected ? parsedMeta.dept : 'Manual Entry Required')}
+                                    </b>
+                                    {parsedMeta?.isDeptDetected && !deptInput && (
+                                        <span className="text-emerald-400 ml-1">✓</span>
+                                    )}
+                                </div>
+                                <div>Academic Year: <b className="text-white">{parsedMeta?.year || '1st Year'}</b></div>
                             </div>
                         )}
 

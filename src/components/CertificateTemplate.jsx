@@ -57,7 +57,7 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
         <div className="certificate-wrapper">
             {/* 1. Translucent Central Institutional Watermark */}
             <div className="cert-watermark-wrap">
-                <img src="/collegelogo2.png" className="cert-watermark" alt="PSG Tech Crest" />
+                <img src="/collegelogo2.png" className="cert-watermark" crossOrigin="anonymous" alt="PSG Tech Crest" />
             </div>
 
             {/* 2. Classical Security Multi-Tiered Borders */}
@@ -76,7 +76,7 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
                 {/* Header: Dual Emblems & Institutional Typography */}
                 <div className="cert-header">
                     <div className="cert-logo-box">
-                        <img src="/collegelogo2.png" className="cert-logo-img" alt="PSG Tech Crest" />
+                        <img src="/collegelogo2.png" className="cert-logo-img" crossOrigin="anonymous" alt="PSG Tech Crest" />
                     </div>
                     <div className="cert-header-text">
                         <h1 className="cert-college-name">PSG COLLEGE OF TECHNOLOGY</h1>
@@ -88,7 +88,7 @@ export default function CertificateTemplate({ data, eventTitle = "FLIGHT & PROPU
                         </h2>
                     </div>
                     <div className="cert-logo-box">
-                        <img src="/logo-removebg-preview.png" className="cert-logo-img" alt="DSDAEA Emblem" />
+                        <img src="/logo-removebg-preview.png" className="cert-logo-img" crossOrigin="anonymous" alt="DSDAEA Emblem" />
                     </div>
                 </div>
 

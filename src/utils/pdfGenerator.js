@@ -1,8 +1,20 @@
 /**
  * High-Precision Certificate Exporter (PDF & JPG) - DSDAEA PSG TECH
  * Produces 300 DPI high-fidelity A4 landscape output via jsPDF + html2canvas
- * Optimized for lightning-fast mobile generation with zero-flash rendering.
+ * Optimized for lightning-fast mobile generation with zero-flash rendering
+ * and full iPhone / iOS Safari WebShare & File Download compatibility.
  */
+
+/**
+ * Check if current client is running on iOS (iPhone / iPad / iPod)
+ */
+export function isIOSDevice() {
+    if (typeof navigator === 'undefined') return false;
+    return (
+        /iPad|iPhone|iPod/.test(navigator.userAgent || '') ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
+}
 
 /**
  * Wait for all images inside an element to be completely loaded and decoded,
@@ -34,7 +46,7 @@ async function waitForImagesAndFonts(element) {
             await Promise.race([
                 Promise.all([
                     document.fonts.load('800 40px "Cinzel"'),
-                    document.fonts.load('800 40px "Cinzel Decorative"'),
+                    document.fonts.load('700 40px "Cinzel Decorative"'),
                     document.fonts.load('400 40px "Pinyon Script"'),
                     document.fonts.load('700 14px "Playfair Display"'),
                     document.fonts.load('600 10px "Montserrat"')
@@ -104,7 +116,7 @@ async function captureCertificateCanvas(elementId, onProgress) {
         const canvas = await html2canvas(element, {
             scale: 2, // 2x scale: 2244px x 1588px (300 DPI equivalent)
             useCORS: true,
-            allowTaint: true,
+            allowTaint: false, // Critical for iOS: tainted canvas throws SecurityError on toDataURL/toBlob
             backgroundColor: '#FFFDF8',
             width: 1122,
             height: 794,
@@ -148,7 +160,58 @@ async function captureCertificateCanvas(elementId, onProgress) {
 }
 
 /**
- * Generate and download high-resolution PDF certificate
+ * Universal file dispatcher: handles iOS native Share Sheet / Save to Files / Photos,
+ * and standard browser blob download with full cross-platform reliability.
+ */
+async function dispatchCertificateBlob(blob, filename, mimeType, onProgress) {
+    const isIOS = isIOSDevice();
+
+    // 1. On iPhone / iPad / iOS Safari, trigger the native Share Sheet so users
+    // can tap "Save to Files", "Save Image", "AirDrop", or share to WhatsApp directly.
+    if (isIOS && typeof navigator !== 'undefined' && navigator.canShare) {
+        try {
+            const file = new File([blob], filename, { type: mimeType });
+            if (navigator.canShare({ files: [file] })) {
+                if (onProgress) onProgress(98);
+                await navigator.share({
+                    files: [file],
+                    title: filename,
+                });
+                if (onProgress) onProgress(100);
+                return { success: true };
+            }
+        } catch (shareErr) {
+            if (shareErr.name === 'AbortError') {
+                // User dismissed native share sheet cleanly
+                if (onProgress) onProgress(100);
+                return { success: true };
+            }
+            console.warn("iOS WebShare dispatch note, proceeding to direct link fallback:", shareErr);
+        }
+    }
+
+    // 2. Cross-platform programmatic anchor trigger
+    if (onProgress) onProgress(95);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+
+    setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 15000);
+
+    if (onProgress) onProgress(100);
+    return { success: true };
+}
+
+/**
+ * Generate and download high-resolution PDF certificate (iPhone / Android / Desktop compatible)
  */
 export async function generateCertificatePDF(elementId = 'certificate-print-zone', filename = 'Certificate.pdf', onProgress) {
     if (onProgress) onProgress(10);
@@ -172,15 +235,14 @@ export async function generateCertificatePDF(elementId = 'certificate-print-zone
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
     pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
     
-    if (onProgress) onProgress(96);
-    pdf.save(filename);
-    if (onProgress) onProgress(100);
+    if (onProgress) onProgress(94);
 
-    return { success: true };
+    const pdfBlob = pdf.output('blob');
+    return await dispatchCertificateBlob(pdfBlob, filename, 'application/pdf', onProgress);
 }
 
 /**
- * Generate and download high-resolution JPG certificate
+ * Generate and download high-resolution JPG certificate (iPhone / Android / Desktop compatible)
  */
 export async function generateCertificateJPG(elementId = 'certificate-print-zone', filename = 'Certificate.jpg', onProgress) {
     if (onProgress) onProgress(10);
@@ -193,22 +255,17 @@ export async function generateCertificateJPG(elementId = 'certificate-print-zone
     if (onProgress) onProgress(88);
 
     return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
+        canvas.toBlob(async (blob) => {
             if (!blob) {
                 reject(new Error('Failed to create JPG blob from canvas'));
                 return;
             }
-            if (onProgress) onProgress(95);
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(url), 5000);
-            if (onProgress) onProgress(100);
-            resolve({ success: true });
+            try {
+                const res = await dispatchCertificateBlob(blob, filename, 'image/jpeg', onProgress);
+                resolve(res);
+            } catch (err) {
+                reject(err);
+            }
         }, 'image/jpeg', 0.95);
     });
 }
