@@ -701,25 +701,11 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                                     FLAGSHIP MISSION
                                 </span>
                             </div>
-
-                            {/* Compact Category Badge */}
-                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-purple-500/15 border border-purple-500/40 rounded-full">
-                                <span className="text-[8px] sm:text-[9px] font-mono-tech text-purple-300 tracking-wider font-bold uppercase">
-                                    CATEGORY: {liveEvent.category ? liveEvent.category.toUpperCase() : "EVENT"}
-                                </span>
-                            </div>
-
-                            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-amber-500/15 border border-amber-500/40 rounded-full">
-                                <Award size={12} className="text-amber-400" />
-                                <span className="text-[8.5px] sm:text-[10px] font-mono-tech text-amber-300 tracking-wider font-bold uppercase">
-                                    {liveEvent.prizes || "₹50,000 PRIZE POOL"}
-                                </span>
-                            </div>
                         </div>
 
                         {/* Glitch Animated Headline (Event Name: Flight & Propulsion in white, Systems in blue) */}
                         <div className="space-y-1 sm:space-y-2">
-                            <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-5xl xl:text-6xl font-display font-black leading-[1.05] tracking-tight">
+                            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl font-display font-black leading-[1.05] tracking-tight">
                                 <span className="block text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.25)]">
                                     <GlitchText text={heroPartWhite} soundOn={soundOn} />
                                 </span>
