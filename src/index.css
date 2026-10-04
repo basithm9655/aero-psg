@@ -10,6 +10,7 @@
         overflow-x: hidden !important;
         max-width: 100vw;
         position: relative;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     * {
@@ -38,6 +39,13 @@ body {
 
 button, a, input, select, textarea {
     touch-action: manipulation;
+}
+
+/* Prevent unwanted zoom-in on focus on iOS Safari */
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
 }
 
 html {
@@ -99,7 +107,7 @@ html {
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
     background-size: 100% 3px, 3px 100%;
     pointer-events: none;
-    z-index: 90;
+    z-index: 1;
 }
 
 @keyframes spin-slow {

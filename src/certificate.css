@@ -35,16 +35,22 @@
     color: var(--cert-text);
     font-family: 'Playfair Display', Georgia, serif;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    user-select: none;
-
-    /* High-Security Guilloche Pattern with Soft Gold & Navy Accents */
-    background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.95) 0%, rgba(252, 248, 237, 0.95) 100%),
-        repeating-linear-gradient(45deg, rgba(197, 155, 39, 0.035) 0px, rgba(197, 155, 39, 0.035) 1px, transparent 1px, transparent 14px),
-        repeating-linear-gradient(-45deg, rgba(0, 31, 63, 0.025) 0px, rgba(0, 31, 63, 0.025) 1px, transparent 1px, transparent 14px);
+    /* Royal Italian Parchment Background: smooth, luminous, authentic luxury */
+    background: radial-gradient(ellipse at 50% 45%, #ffffff 0%, #fefcf5 55%, #fbf6e8 100%);
 
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+}
+
+/* High-Security Vector Guilloche Rosette Background */
+.cert-guilloche-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .certificate-wrapper img {
@@ -62,7 +68,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.09;
+    opacity: 0.085;
     pointer-events: none;
     z-index: 1;
 }
@@ -86,6 +92,7 @@
     right: 14px;
     bottom: 14px;
     border: 3.5px solid #c59b27;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
     pointer-events: none;
     z-index: 2;
 }
@@ -115,40 +122,37 @@
 }
 
 /* ===================================================
-   CLASSICAL CORNER FILIGREE ORNAMENTS (CSS SVG Data-URI)
+   ORNATE VECTOR CORNER FILIGREES (SVG)
    =================================================== */
-.cert-corner {
+.cert-corner-svg {
     position: absolute;
-    width: 68px;
-    height: 68px;
-    background-size: contain;
-    background-repeat: no-repeat;
+    width: 82px;
+    height: 82px;
     z-index: 4;
     pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='68' height='68' viewBox='0 0 68 68' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H42L15 15V42H0V0Z' fill='%23c59b27'/%3E%3Cpath d='M4 4H44L19 19V44H4V4Z' fill='%23f3cf55' opacity='0.9'/%3E%3Cpath d='M2 2H36L13 13V36H2V2Z' fill='%23826012' opacity='0.6'/%3E%3Ccircle cx='10' cy='10' r='4' fill='%23001F3F'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ffffff'/%3E%3Cpath d='M0 0L54 0C36 7 24 22 17 40L17 17L40 17C22 24 7 36 0 54L0 0Z' stroke='%23826012' stroke-width='0.8'/%3E%3C/svg%3E");
 }
 
-.cert-corner.tl {
-    top: 12px;
-    left: 12px;
+.cert-corner-svg.tl {
+    top: 14px;
+    left: 14px;
 }
 
-.cert-corner.tr {
-    top: 12px;
-    right: 12px;
-    transform: rotate(90deg);
+.cert-corner-svg.tr {
+    top: 14px;
+    right: 14px;
+    transform: scaleX(-1);
 }
 
-.cert-corner.br {
-    bottom: 12px;
-    right: 12px;
-    transform: rotate(180deg);
+.cert-corner-svg.bl {
+    bottom: 14px;
+    left: 14px;
+    transform: scaleY(-1);
 }
 
-.cert-corner.bl {
-    bottom: 12px;
-    left: 12px;
-    transform: rotate(270deg);
+.cert-corner-svg.br {
+    bottom: 14px;
+    right: 14px;
+    transform: scale(-1, -1);
 }
 
 /* ===================================================
@@ -156,9 +160,9 @@
    =================================================== */
 .cert-layout {
     position: absolute;
-    top: 34px;
-    left: 45px;
-    right: 45px;
+    top: 40px;
+    left: 50px;
+    right: 50px;
     bottom: 34px;
     display: flex;
     flex-direction: column;
@@ -175,7 +179,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #c59b27;
+    border-bottom: 1.5px solid #c59b27;
+    box-shadow: 0 1px 0 rgba(197, 155, 39, 0.4);
     padding-bottom: 8px;
 }
 
@@ -185,18 +190,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 2px solid #c59b27;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 4px;
+    padding: 2px;
     box-sizing: border-box;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .cert-logo-img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
 }
 
 .cert-header-text {
@@ -210,7 +217,7 @@
     font-size: 21px;
     font-weight: 800;
     color: #001F3F;
-    letter-spacing: 2.2px;
+    letter-spacing: 2.4px;
     margin: 0;
     line-height: 1.1;
     text-transform: uppercase;
@@ -220,7 +227,7 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 8px;
     font-weight: 600;
-    color: #64748b;
+    color: #556987;
     letter-spacing: 2px;
     text-transform: uppercase;
     margin: 3px 0 0 0;
@@ -228,7 +235,7 @@
 
 .cert-dept-name {
     font-family: 'Cinzel', serif;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
     color: #826012;
     letter-spacing: 2px;
@@ -237,55 +244,95 @@
 }
 
 /* ===================================================
-   2. GRAND CERTIFICATE TITLE BANNER & DISTINCTION BADGE
+   2. GRAND CERTIFICATE TITLE & ENGRAVED RULES
    =================================================== */
-.cert-banner-section {
+.cert-title-section {
     text-align: center;
-    margin: 2px 0;
+    margin: 2px 0 1px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cert-title-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 480px;
+    gap: 8px;
+}
+
+.cert-title-rule-top {
+    margin-bottom: 2px;
+    width: 520px;
+}
+
+.cert-title-rule-bottom {
+    margin-top: 4px;
+    width: 390px;
+}
+
+.cert-title-rule .cert-rule-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c59b27 35%, #fadb6d 50%, #c59b27 65%, transparent);
+}
+
+.cert-title-rule .cert-rule-diamond {
+    color: #c59b27;
+    font-size: 8px;
+    line-height: 1;
 }
 
 .cert-main-heading {
-    font-family: 'Cinzel Decorative', 'Cinzel', serif;
-    font-size: 38px;
-    font-weight: 700;
-    letter-spacing: 10px;
-    color: #f3cf55;
-    background: linear-gradient(135deg, #001226 0%, #001F3F 50%, #002b56 100%);
-    border: 2px solid #c59b27;
-    display: inline-block;
-    padding: 4px 56px 10px 56px;
-    border-radius: 2px;
-    box-shadow: 0 4px 14px rgba(0, 31, 63, 0.25);
-    margin: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 39px;
+    font-weight: 900;
+    letter-spacing: 12px;
+    color: #001F3F;
+    margin: 1px 0;
     line-height: 1.15;
     text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 31, 63, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cert-heading-flank {
+    color: #c59b27;
+    font-size: 15px;
+    margin: 0 14px;
+    opacity: 0.85;
+    text-shadow: none;
 }
 
 .cert-badge-wrapper {
-    margin-top: 5px;
+    margin-top: 3px;
 }
 
 .cert-distinction-badge {
     display: inline-block;
-    padding: 3.5px 28px;
+    padding: 3px 26px;
     font-family: 'Cinzel', serif;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 9.5px;
+    font-weight: 800;
     letter-spacing: 3.5px;
     text-transform: uppercase;
-    border-radius: 2px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .badge-merit {
-    background: #001F3F;
-    color: #f3cf55;
-    border: 1px solid #c59b27;
+    background: linear-gradient(135deg, #001F3F 0%, #001124 100%);
+    color: #fce588;
+    border: 1.2px solid #c59b27;
 }
 
 .badge-participation {
-    background: #0b2545;
+    background: linear-gradient(135deg, #082343 0%, #021226 100%);
     color: #fef08a;
-    border: 1px solid #d4af37;
+    border: 1.2px solid #d4af37;
 }
 
 /* ===================================================
@@ -321,25 +368,17 @@
     margin-right: auto;
 }
 
-.cert-name-underline {
+.cert-flourish-wrap {
     display: flex;
-    align-items: center;
     justify-content: center;
-    width: 320px;
-    margin: 4px auto 6px auto;
-    gap: 8px;
+    align-items: center;
+    margin: 2px auto 4px auto;
 }
 
-.cert-name-underline .cert-line {
-    flex: 1;
-    height: 1px;
-    background: #c59b27;
-}
-
-.cert-name-underline .cert-diamond {
-    color: #c59b27;
-    font-size: 10px;
-    line-height: 1;
+.cert-flourish-svg {
+    width: 380px;
+    height: 18px;
+    display: block;
 }
 
 .cert-citation-details {
@@ -364,12 +403,12 @@
 
 .cert-event-plate {
     display: inline-block;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(252, 248, 237, 0.98));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.99), rgba(253, 249, 240, 0.98));
     border: 1.5px solid #c59b27;
-    padding: 5px 26px;
-    border-radius: 2px;
-    margin: 5px auto 3px auto;
-    box-shadow: 0 2px 8px rgba(197, 155, 39, 0.15);
+    padding: 5px 28px;
+    border-radius: 3px;
+    margin: 6px auto 3px auto;
+    box-shadow: 0 3px 10px rgba(197, 155, 39, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .cert-event-title {
@@ -377,7 +416,7 @@
     font-size: 15px;
     font-weight: 800;
     color: #001F3F;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.8px;
     text-transform: uppercase;
 }
 
@@ -437,7 +476,7 @@
 
 .cert-sig-line {
     height: 1.5px;
-    background: #c59b27;
+    background: linear-gradient(90deg, transparent, #c59b27 15%, #c59b27 85%, transparent);
     width: 100%;
     margin: 2px 0 5px 0;
 }
@@ -465,79 +504,22 @@
     margin-top: 1px;
 }
 
-/* Central 3D Embossed Gold Medallion Seal */
+/* Central 36-Point Serrated 3D Embossed Gold Notary Seal */
 .cert-seal-block {
     position: absolute;
     left: 50%;
-    bottom: -2px;
+    bottom: -6px;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 20;
+    pointer-events: none;
 }
 
-.cert-embossed-seal {
-    width: 76px;
-    height: 76px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff5c0 0%, #e5be4e 40%, #b68822 75%, #7d5b0c 100%);
-    border: 3px double #ffffff;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 0 12px rgba(212, 175, 55, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 2;
-}
-
-.cert-seal-inner {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 1px dashed rgba(95, 68, 8, 0.6);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.cert-seal-star {
-    font-size: 18px;
-    color: #3b2802;
-    line-height: 1;
-}
-
-.cert-seal-label {
-    font-family: 'Cinzel', serif;
-    font-size: 6px;
-    font-weight: 800;
-    color: #3b2802;
-    letter-spacing: 1px;
-    margin-top: 1px;
-    line-height: 1.1;
-}
-
-.cert-seal-ribbons {
-    display: flex;
-    gap: 4px;
-    margin-top: -10px;
-    z-index: 1;
-}
-
-.cert-ribbon-tail {
-    width: 16px;
-    height: 24px;
-    background: #001F3F;
-    border: 0.5px solid #c59b27;
-}
-
-.cert-ribbon-tail.ribbon-left {
-    transform: rotate(-12deg);
-}
-
-.cert-ribbon-tail.ribbon-right {
-    transform: rotate(12deg);
+.cert-seal-svg {
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.32));
+    display: block;
 }
 
 /* ===================================================
@@ -570,47 +552,51 @@
     width: 1122px;
     height: 794px;
     transform-origin: top left;
+    position: relative;
+    z-index: 95; /* Elevate above .scanlines::after (z-index: 90) */
+    background-color: #fffdf8;
+    border-radius: 4px;
 }
 
 @media screen and (min-width: 1280px) {
     .cert-screen-preview-container {
         transform: scale(0.72);
-        margin-bottom: -220px;
+        margin-bottom: -222px;
     }
 }
 
 @media screen and (max-width: 1279px) and (min-width: 900px) {
     .cert-screen-preview-container {
         transform: scale(0.60);
-        margin-bottom: -315px;
+        margin-bottom: -318px;
     }
 }
 
 @media screen and (max-width: 899px) and (min-width: 640px) {
     .cert-screen-preview-container {
         transform: scale(0.48);
-        margin-bottom: -410px;
+        margin-bottom: -413px;
     }
 }
 
-@media screen and (max-width: 639px) and (min-width: 480px) {
+@media screen and (max-width: 639px) and (min-width: 441px) {
     .cert-screen-preview-container {
         transform: scale(0.36);
-        margin-bottom: -505px;
+        margin-bottom: -508px;
     }
 }
 
-@media screen and (max-width: 479px) and (min-width: 380px) {
+@media screen and (max-width: 440px) and (min-width: 360px) {
     .cert-screen-preview-container {
-        transform: scale(0.28);
-        margin-bottom: -570px;
+        transform: scale(0.295);
+        margin-bottom: -560px;
     }
 }
 
-@media screen and (max-width: 379px) {
+@media screen and (max-width: 359px) {
     .cert-screen-preview-container {
         transform: scale(0.24);
-        margin-bottom: -600px;
+        margin-bottom: -603px;
     }
 }
 

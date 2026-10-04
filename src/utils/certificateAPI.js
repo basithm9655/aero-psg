@@ -1,35 +1,10 @@
 import { fetchCertificateFromDb, getCadetByRoll } from '../firebase.js';
+import { parseRollNumber, normaliseYearLabel, formatCertificateName } from './rollParser.js';
+import { EVENTS_DATA } from '../data/events.js';
 
-// Certificate verification helper functions
+export { formatCertificateName };
 
-/**
- * Format student name for certificate display:
- * Always capitalize the first letter and keep the rest in lowercase (Title Case).
- * Preserves initials (e.g. "P", "M", "P.R.", etc.).
- */
-export function formatCertificateName(name) {
-    if (!name || typeof name !== 'string') return "Aerospace Cadet";
-    const trimmed = name.trim();
-    if (!trimmed) return "Aerospace Cadet";
-
-    return trimmed
-        .split(/\s+/)
-        .map(word => {
-            if (word.includes('.')) {
-                return word
-                    .split('.')
-                    .map(part => {
-                        if (!part) return '';
-                        if (part.length === 1) return part.toUpperCase();
-                        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-                    })
-                    .join('.');
-            }
-            if (word.length === 1) return word.toUpperCase();
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        })
-        .join(' ');
-}
+const LEGACY_EVENT_TITLE = 'FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026';
 
 /**
  * Helper to normalize award / rank title
@@ -49,6 +24,49 @@ export function formatRankTitle(place) {
         return 'Achieved 3rd Place';
     }
     return 'Certificate of Participation';
+}
+
+/**
+ * Resolve the correct event title for a cadet record.
+ * New registrations store `event` explicitly. Older records (created before the
+ * field existed) are matched to the event they registered for using the
+ * registration timestamp: the first certificate-bearing event that took place
+ * on/after the registration date.
+ */
+export function resolveEventTitle(record) {
+    if (record && typeof record.event === 'string' && record.event.trim()) {
+        return record.event.trim();
+    }
+    const registeredAt = record?.registeredAt ? new Date(record.registeredAt) : null;
+    if (!registeredAt || isNaN(registeredAt.getTime())) return LEGACY_EVENT_TITLE;
+
+    const candidates = EVENTS_DATA
+        .filter(e => e.certificateTitle && (e.isLive || e.status === 'completed' || e.status === 'live'))
+        .sort((a, b) => a.eventDate - b.eventDate);
+
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const match = candidates.find(e => e.eventDate.getTime() + ONE_DAY >= registeredAt.getTime());
+    return (match || candidates[candidates.length - 1])?.certificateTitle || LEGACY_EVENT_TITLE;
+}
+
+/**
+ * Build a clean, fully-verified certificate payload.
+ * Year and department fall back to values parsed from the roll number
+ * (never to a hard-coded default) so every printed detail is accurate.
+ */
+function buildCertificatePayload(source, cleanRoll, placeOverride) {
+    const parsed = parseRollNumber(cleanRoll);
+    const year = normaliseYearLabel(source.year) || normaliseYearLabel(parsed?.year) || '';
+    const dept = (source.dept && String(source.dept).trim()) || parsed?.dept || '';
+    return {
+        name: formatCertificateName(source.name),
+        rollNo: (source.rollNo || source.roll || cleanRoll).toString().trim().toUpperCase(),
+        phone: source.phone || '',
+        year,
+        dept,
+        place: placeOverride !== undefined ? placeOverride : formatRankTitle(source.place),
+        event: resolveEventTitle(source)
+    };
 }
 
 /**
@@ -74,11 +92,7 @@ export async function fetchCertificateData(rollNo) {
     try {
         const cloudCert = await fetchCertificateFromDb(cleanRoll);
         if (cloudCert && cloudCert.name && cloudCert.rollNo) {
-            return {
-                ...cloudCert,
-                name: formatCertificateName(cloudCert.name),
-                place: formatRankTitle(cloudCert.place)
-            };
+            return buildCertificatePayload(cloudCert, cleanRoll);
         }
     } catch (e) {
         console.warn("Direct certificate DB check issue:", e.message);
@@ -97,18 +111,8 @@ export async function fetchCertificateData(rollNo) {
                 );
             }
 
-            // Student attended! Check rank (1st, 2nd, 3rd, or Participation)
-            const rankText = formatRankTitle(cadet.place);
-
-            return {
-                name: formatCertificateName(cadet.name),
-                rollNo: cleanRoll,
-                phone: cadet.phone || '',
-                year: cadet.year || '4th',
-                dept: cadet.dept || 'Aerospace Engineering',
-                place: rankText,
-                event: cadet.event || 'FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026'
-            };
+            // Student attended! Rank (1st, 2nd, 3rd) or Participation is resolved in the payload
+            return buildCertificatePayload(cadet, cleanRoll);
         }
     } catch (err) {
         // If it's the attendance unverified error, rethrow directly
@@ -121,19 +125,14 @@ export async function fetchCertificateData(rollNo) {
     // 3. Check Google Apps Script / Sheet Archive Endpoint
     try {
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxAkDBvojbxbRul99ETqa_7nk3Z9K8szZo_YLVMXIjcr-AoP-rQO3DAEtzcXfFiZa_g/exec';
-        const res = await fetch(`${SCRIPT_URL}?rollNo=${encodeURIComponent(cleanRoll)}`);
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), 9000) : null;
+        const res = await fetch(`${SCRIPT_URL}?rollNo=${encodeURIComponent(cleanRoll)}`, controller ? { signal: controller.signal } : undefined);
+        if (timer) clearTimeout(timer);
         if (res.ok) {
             const json = await res.json();
             if (json && json.success && json.data && json.data.name) {
-                return {
-                    name: formatCertificateName(json.data.name),
-                    rollNo: json.data.rollNo || cleanRoll,
-                    phone: json.data.phone || '',
-                    year: json.data.year || '4th',
-                    dept: json.data.dept || 'Aerospace Engineering',
-                    place: formatRankTitle(json.data.place),
-                    event: json.data.event || 'FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026'
-                };
+                return buildCertificatePayload({ ...json.data, rollNo: json.data.rollNo || cleanRoll }, cleanRoll);
             }
         }
     } catch (e) {

@@ -396,7 +396,7 @@ export default function App() {
     };
 
     return (
-        <div className="relative min-h-screen scanlines selection:bg-[#00f0ff] selection:text-black bg-[#020306]">
+        <div className={`relative min-h-screen ${view === 'intro' ? 'scanlines' : ''} selection:bg-[#00f0ff] selection:text-black bg-[#020306]`}>
             {/* Background Layer */}
             <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0b1b30] via-[#03060d] to-[#010204]"></div>
             <ParallaxField mousePos={mousePos} speed={view === 'intro' ? 8 : 0.5} />
@@ -1075,7 +1075,7 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
             </section>
 
             {/* FOOTER */}
-            <footer className="bg-[#020306] border-t border-[#00f0ff]/20 pt-16 pb-12 relative overflow-hidden">
+            <footer className="bg-[#020306] border-t border-[#00f0ff]/20 pt-16 pb-28 lg:pb-12 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-60"></div>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
                     <div className="md:col-span-2 space-y-4">
@@ -1268,6 +1268,41 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                     </div>
                 </div>
             )}
+
+            {/* FLOATING MOBILE DOCKED NAVIGATION BAR */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#02050b]/92 backdrop-blur-xl border-t border-[#00f0ff]/25 px-2 py-2 flex items-center justify-around shadow-[0_-8px_30px_rgba(0,0,0,0.85)]">
+                <button
+                    onClick={() => scrollTo('missions')}
+                    className="flex flex-col items-center gap-0.5 text-gray-400 hover:text-[#00f0ff] active:scale-95 transition-all py-1 px-2.5 rounded-lg hover:bg-[#00f0ff]/10"
+                >
+                    <Target size={17} className="text-[#00f0ff]" />
+                    <span className="text-[9px] font-mono-tech tracking-wider font-bold">MISSIONS</span>
+                </button>
+                <button
+                    onClick={() => scrollTo('crew')}
+                    className="flex flex-col items-center gap-0.5 text-gray-400 hover:text-[#00f0ff] active:scale-95 transition-all py-1 px-2.5 rounded-lg hover:bg-[#00f0ff]/10"
+                >
+                    <Shield size={17} className="text-[#00f0ff]" />
+                    <span className="text-[9px] font-mono-tech tracking-wider font-bold">CREW</span>
+                </button>
+                <button
+                    onClick={() => scrollTo('archives')}
+                    className="flex flex-col items-center gap-0.5 text-gray-400 hover:text-[#00f0ff] active:scale-95 transition-all py-1 px-2.5 rounded-lg hover:bg-[#00f0ff]/10"
+                >
+                    <Award size={17} className="text-amber-400" />
+                    <span className="text-[9px] font-mono-tech tracking-wider font-bold text-amber-400">CERTIFICATE</span>
+                </button>
+                <button
+                    onClick={() => { action(); setShowReg(true); }}
+                    className={isRegistrationClosed
+                        ? "flex items-center gap-1.5 px-3 py-2 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded font-mono-tech font-bold text-[10px] tracking-wider active:scale-95 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+                        : "flex items-center gap-1.5 px-3.5 py-2 bg-[#00f0ff] text-black rounded font-mono-tech font-bold text-[10px] tracking-wider active:scale-95 shadow-[0_0_20px_rgba(0,240,255,0.6)]"
+                    }
+                >
+                    {isRegistrationClosed ? <Lock size={12} /> : <Rocket size={13} />}
+                    <span>{isRegistrationClosed ? 'PASS' : 'JOIN'}</span>
+                </button>
+            </div>
 
         </div>
     );
@@ -1485,6 +1520,7 @@ function CertificateVault({ soundOn, playSfx }) {
     const [errorMessage, setErrorMessage] = useState("");
     const [generatingStatus, setGeneratingStatus] = useState(null); // null, 'pdf', 'jpg'
     const [progressPercent, setProgressPercent] = useState(0);
+    const [showZoomModal, setShowZoomModal] = useState(false);
 
     const search = async (overrideRoll) => {
         const query = (overrideRoll || roll).trim().toUpperCase();
@@ -1500,6 +1536,13 @@ function CertificateVault({ soundOn, playSfx }) {
             setCertificateData(data);
             setState("FOUND");
             if (soundOn) playSfx('success');
+
+            // Preload and cache certificate assets immediately so downloads trigger with zero network wait
+            ['/collegelogo2.png', '/logo-removebg-preview.png', '/FAsign.png', '/secsign.png'].forEach(src => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = src;
+            });
         } catch (error) {
             console.error('Certificate search error:', error);
             setErrorMessage(error.message || "Certificate record not located.");
@@ -1512,12 +1555,19 @@ function CertificateVault({ soundOn, playSfx }) {
         if (generatingStatus) return;
         if (soundOn) playSfx('click');
         setGeneratingStatus('jpg');
-        setProgressPercent(15);
+        setProgressPercent(20);
         try {
             const { generateCertificateJPG } = await import('./utils/pdfGenerator');
             const cleanName = certificateData.name?.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') || 'Cadet';
             const filename = `DSDAEA_Certificate_${certificateData.rollNo}_${cleanName}.jpg`;
-            await generateCertificateJPG('certificate-print-zone', filename, (pct) => setProgressPercent(pct));
+            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026";
+            await generateCertificateJPG(
+                'certificate-print-zone',
+                filename,
+                (pct) => setProgressPercent(pct),
+                certificateData,
+                eventTitle
+            );
             if (soundOn) playSfx('success');
         } catch (error) {
             console.error('Error downloading JPG certificate:', error);
@@ -1527,7 +1577,7 @@ function CertificateVault({ soundOn, playSfx }) {
             setTimeout(() => {
                 setGeneratingStatus(null);
                 setProgressPercent(0);
-            }, 600);
+            }, 500);
         }
     };
 
@@ -1535,11 +1585,18 @@ function CertificateVault({ soundOn, playSfx }) {
         if (generatingStatus) return;
         if (soundOn) playSfx('click');
         setGeneratingStatus('pdf');
-        setProgressPercent(15);
+        setProgressPercent(20);
         try {
             const { generateCertificatePDF, generatePDFFilename } = await import('./utils/pdfGenerator');
             const filename = generatePDFFilename(certificateData);
-            await generateCertificatePDF('certificate-print-zone', filename, (pct) => setProgressPercent(pct));
+            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026";
+            await generateCertificatePDF(
+                'certificate-print-zone',
+                filename,
+                (pct) => setProgressPercent(pct),
+                certificateData,
+                eventTitle
+            );
             if (soundOn) playSfx('success');
         } catch (error) {
             console.error('PDF generation error:', error);
@@ -1549,7 +1606,7 @@ function CertificateVault({ soundOn, playSfx }) {
             setTimeout(() => {
                 setGeneratingStatus(null);
                 setProgressPercent(0);
-            }, 600);
+            }, 500);
         }
     };
 
@@ -1688,7 +1745,7 @@ function CertificateVault({ soundOn, playSfx }) {
                                 <div className="min-w-0">
                                     <h4 className="font-display font-bold text-white text-base sm:text-lg truncate">{certificateData.name}</h4>
                                     <p className="text-gray-400 font-mono-tech text-xs truncate">
-                                        ID: {certificateData.rollNo} • {certificateData.year} Year • {certificateData.dept}
+                                        ID: {certificateData.rollNo} • {(certificateData.year || '4th').replace(/\s*year\s*/gi, '').trim()} Year • {certificateData.dept}
                                     </p>
                                 </div>
                             </div>
@@ -1725,21 +1782,95 @@ function CertificateVault({ soundOn, playSfx }) {
                         {/* Live Certificate Preview Box */}
                         <div className="border border-[#00f0ff]/20 p-3 sm:p-4 bg-black/40 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
-                                <p className="text-[#00f0ff] text-xs font-mono-tech tracking-widest">OFFICIAL CREDENTIAL PREVIEW</p>
-                                <span className="text-[10px] text-gray-400 font-mono-tech sm:hidden">↔ Swipe to view</span>
+                                <p className="text-[#00f0ff] text-xs font-mono-tech tracking-widest flex items-center gap-1.5">
+                                    <Award size={14} className="text-[#00f0ff]" /> OFFICIAL CREDENTIAL PREVIEW
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setShowZoomModal(true)}
+                                        className="text-[10.5px] text-[#00f0ff] hover:text-white bg-[#00f0ff]/10 hover:bg-[#00f0ff]/25 px-2.5 py-1 rounded border border-[#00f0ff]/40 flex items-center gap-1 transition-colors"
+                                    >
+                                        <Maximize2 size={12} /> FULL VIEW
+                                    </button>
+                                    <span className="text-[10px] text-gray-400 font-mono-tech sm:hidden">↔ Swipe</span>
+                                </div>
                             </div>
                             <div className="overflow-x-auto pb-2">
                                 <div className="cert-screen-preview-container mx-auto">
                                     <CertificateTemplate
                                         data={certificateData}
-                                        eventTitle={CURRENT_EVENT.certificateTitle || "FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026"}
+                                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
                                     />
                                 </div>
+                            </div>
+
+                            {/* Mobile Quick Action Buttons directly beneath preview */}
+                            <div className="flex sm:hidden gap-2 pt-3 border-t border-[#00f0ff]/15 mt-2">
+                                <button
+                                    onClick={handlePrint}
+                                    disabled={!!generatingStatus}
+                                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95 transition-all"
+                                >
+                                    <Download size={14} /> PDF
+                                </button>
+                                <button
+                                    onClick={handleDownloadJPG}
+                                    disabled={!!generatingStatus}
+                                    className="flex-1 py-3 bg-[#00f0ff] hover:bg-white text-black font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-1.5 shadow active:scale-95 transition-all"
+                                >
+                                    <FileText size={14} /> JPG
+                                </button>
                             </div>
                         </div>
                     </div>
                 ) : null}
             </div>
+
+            {/* FULL SCREEN ZOOM PREVIEW MODAL FOR MOBILE & DESKTOP */}
+            {showZoomModal && certificateData && (
+                <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between pb-3 border-b border-[#00f0ff]/30">
+                        <div className="flex items-center gap-2 text-white font-mono-tech text-xs sm:text-sm">
+                            <Award className="text-[#00f0ff]" size={18} />
+                            <span>FULL CREDENTIAL VIEW // 300 DPI MASTER A4</span>
+                        </div>
+                        <button
+                            onClick={() => setShowZoomModal(false)}
+                            className="p-2 text-gray-400 hover:text-white rounded-full bg-white/10 active:scale-95 transition-all"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-auto flex items-center justify-center py-4">
+                        <div className="max-w-full max-h-full overflow-auto p-2">
+                            <div className="transform scale-[0.34] xs:scale-[0.44] sm:scale-[0.65] md:scale-[0.85] origin-center shadow-[0_0_50px_rgba(0,0,0,0.9)]">
+                                <CertificateTemplate
+                                    data={certificateData}
+                                    eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 sm:gap-4 max-w-md mx-auto w-full pt-3 border-t border-[#00f0ff]/20">
+                        <button
+                            onClick={handlePrint}
+                            disabled={!!generatingStatus}
+                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-2 active:scale-95 shadow"
+                        >
+                            <Download size={14} /> DOWNLOAD PDF
+                        </button>
+                        <button
+                            onClick={handleDownloadJPG}
+                            disabled={!!generatingStatus}
+                            className="flex-1 py-3 bg-[#00f0ff] hover:bg-white text-black font-mono-tech font-bold text-xs tracking-wider rounded flex items-center justify-center gap-2 active:scale-95 shadow"
+                        >
+                            <FileText size={14} /> DOWNLOAD JPG
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Dedicated 1:1 unscaled print zone for PDF and JPG generation */}
             {state === "FOUND" && certificateData && (
@@ -1757,7 +1888,7 @@ function CertificateVault({ soundOn, playSfx }) {
                 >
                     <CertificateTemplate
                         data={certificateData}
-                        eventTitle={CURRENT_EVENT.certificateTitle || "FLIGHT & PROPULSION SYSTEMS WORKSHOP 2026"}
+                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
                     />
                 </div>
             )}

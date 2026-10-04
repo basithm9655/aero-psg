@@ -362,11 +362,11 @@ export async function fetchCertificateFromDb(rollNo) {
     const cleanRoll = (rollNo || '').trim().toUpperCase();
     if (!cleanRoll) return null;
 
-    // Check Firebase if configured
-    if (db && isFirebaseConfigured()) {
+    // Check Firebase if configured (getDb() lazily initialises the client on first use)
+    const firestore = getDb();
+    if (firestore && isFirebaseConfigured()) {
         try {
-            const docRef = doc(db, 'certificates', cleanRoll);
-            const snap = await getDocs(query(collection(db, 'certificates'), where('rollNo', '==', cleanRoll)));
+            const snap = await getDocs(query(collection(firestore, 'certificates'), where('rollNo', '==', cleanRoll)));
             if (!snap.empty) {
                 return snap.docs[0].data();
             }
