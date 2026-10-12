@@ -10,7 +10,8 @@ import rawEvents from './events.json';
 // Normalize events so dates and statuses are ready for display
 export const EVENTS_DATA = rawEvents.map(event => ({
     ...event,
-    eventDate: event.eventDate ? new Date(event.eventDate) : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+    eventDate: event.eventDate ? new Date(event.eventDate) : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    whatsappGroup: event.whatsappGroup || "https://chat.whatsapp.com/CbY7DzEmWJt5ecekLZX6Di"
 }));
 
 // ========== HELPER FUNCTIONS ==========
