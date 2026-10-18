@@ -57,8 +57,8 @@ export const CONFIG = {
     countdown: {
         // EDIT THIS: Set your target date and time (Format: "YYYY-MM-DDTHH:MM:SS")
         // Example: "2026-03-15T10:00:00" for March 15, 2026 at 10:00 AM
-        targetDate: "2026-03-15T10:00:00",
+        targetDate: "2026-11-02T16:30:00",
         label: "IGNITION TIMER",
-        description: "Next Launch Sequence",
+        description: "CAD Design Challenge Launch Sequence",
     },
 };

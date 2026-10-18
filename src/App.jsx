@@ -479,8 +479,9 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
                     prizes: adminLive.prizes || "Cash Pool + Merit Certificates",
                     tagline: adminLive.tagline || "Where Curiosity Defies Gravity",
                     image: adminLive.photo || adminLive.image || "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800",
-                    phase: adminLive.phase || "REGISTRATION CLOSED",
-                    registrationEnabled: adminLive.registrationEnabled === true,
+                    phase: adminLive.phase || (adminLive.registrationEnabled === false ? "REGISTRATION CLOSED" : "REGISTRATION OPEN"),
+                    registrationEnabled: adminLive.registrationEnabled !== false,
+                    countdownStopped: adminLive.countdownStopped !== undefined ? adminLive.countdownStopped : true,
                     certificateTitle: adminLive.certificateTitle || adminLive.title,
                     whatsappGroup: adminLive.whatsappGroup || adminLive.whatsappLink || "https://chat.whatsapp.com/CbY7DzEmWJt5ecekLZX6Di"
                 };
@@ -496,15 +497,18 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
     const activeRegEvent = regTargetEvent || liveEvent;
     const isRegistrationClosed = liveEvent.registrationEnabled === false;
 
-    const rawTitle = liveEvent.title || "Horizon Cup: Olympiad & Quiz";
+    const rawTitle = liveEvent.title || "CAD Design Challenge";
     const titleColonIdx = rawTitle.indexOf(':');
     const heroTitle = titleColonIdx > -1 ? rawTitle.substring(0, titleColonIdx).trim() : rawTitle.trim();
-    const heroShortType = (liveEvent.type || (titleColonIdx > -1 ? rawTitle.substring(titleColonIdx + 1).trim() : "OLYMPIAD & QUIZ")).toUpperCase();
+    const heroShortType = (liveEvent.type || (titleColonIdx > -1 ? rawTitle.substring(titleColonIdx + 1).trim() : "DESIGN COMPETITION")).toUpperCase();
 
-    // Segment title: e.g. "Horizon" in white, "Cup" in blue
+    // Segment title: e.g. "CAD Design" in white, "Challenge" in blue
     let heroPartWhite = heroTitle;
     let heroPartBlue = "";
-    if (heroTitle.toLowerCase().includes("horizon cup")) {
+    if (heroTitle.toLowerCase().includes("cad design challenge")) {
+        heroPartWhite = "CAD Design";
+        heroPartBlue = "Challenge";
+    } else if (heroTitle.toLowerCase().includes("horizon cup")) {
         heroPartWhite = "Horizon";
         heroPartBlue = "Cup";
     } else if (heroTitle.toLowerCase().includes("flight & propulsion")) {
@@ -742,7 +746,11 @@ function SinglePageInterface({ soundOn, toggleSound, mousePos }) {
 
                         {/* Dynamic Countdown Unit */}
                         <div className="pt-1 max-w-md lg:max-w-md w-full">
-                            <CountdownWidget targetDate={liveEvent.eventDate} registrationClosed={isRegistrationClosed} />
+                            <CountdownWidget 
+                                targetDate={liveEvent.eventDate} 
+                                registrationClosed={isRegistrationClosed} 
+                                isStopped={Boolean(liveEvent.countdownStopped) || liveEvent.showCountdown === false}
+                            />
                         </div>
 
                         {/* Primary Call to Action & More Details Buttons */}
@@ -1467,10 +1475,25 @@ function AerospaceOrbiterHUD({ mousePos, soundOn }) {
 
 
 /* --- COUNTDOWN TIMER WIDGET --- */
-function CountdownWidget({ targetDate, registrationClosed = false }) {
-    const [timeLeft, setTimeLeft] = useState({ days: 14, hours: 8, minutes: 22, seconds: 45 });
+function CountdownWidget({ targetDate, registrationClosed = false, isStopped = false }) {
+    const [timeLeft, setTimeLeft] = useState(() => {
+        if (isStopped || !targetDate) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        const diff = new Date(targetDate).getTime() - Date.now();
+        if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        return {
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((diff / 1000 / 60) % 60),
+            seconds: Math.floor((diff / 1000) % 60)
+        };
+    });
 
     useEffect(() => {
+        if (isStopped) {
+            setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            return;
+        }
+
         const calculateTimeLeft = () => {
             const now = new Date().getTime();
             const eventTime = new Date(targetDate).getTime();
@@ -1492,7 +1515,7 @@ function CountdownWidget({ targetDate, registrationClosed = false }) {
         calculateTimeLeft();
         const timer = setInterval(calculateTimeLeft, 1000);
         return () => clearInterval(timer);
-    }, [targetDate]);
+    }, [targetDate, isStopped]);
 
     const TimeUnit = ({ value, label }) => (
         <div className="flex flex-col items-center flex-1 min-w-0">
@@ -1585,7 +1608,7 @@ function CertificateVault({ soundOn, playSfx }) {
             const { generateCertificateJPG } = await import('./utils/pdfGenerator');
             const cleanName = certificateData.name?.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') || 'Cadet';
             const filename = `DSDAEA_Certificate_${certificateData.rollNo}_${cleanName}.jpg`;
-            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026";
+            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "AEROSPACE CAD DESIGN CHALLENGE 2026";
             await generateCertificateJPG(
                 'certificate-print-zone',
                 filename,
@@ -1614,7 +1637,7 @@ function CertificateVault({ soundOn, playSfx }) {
         try {
             const { generateCertificatePDF, generatePDFFilename } = await import('./utils/pdfGenerator');
             const filename = generatePDFFilename(certificateData);
-            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026";
+            const eventTitle = certificateData.event || CURRENT_EVENT.certificateTitle || "AEROSPACE CAD DESIGN CHALLENGE 2026";
             await generateCertificatePDF(
                 'certificate-print-zone',
                 filename,
@@ -1824,7 +1847,7 @@ function CertificateVault({ soundOn, playSfx }) {
                                 <div className="cert-screen-preview-container mx-auto">
                                     <CertificateTemplate
                                         data={certificateData}
-                                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
+                                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "AEROSPACE CAD DESIGN CHALLENGE 2026"}
                                     />
                                 </div>
                             </div>
@@ -1872,7 +1895,7 @@ function CertificateVault({ soundOn, playSfx }) {
                             <div className="transform scale-[0.34] xs:scale-[0.44] sm:scale-[0.65] md:scale-[0.85] origin-center shadow-[0_0_50px_rgba(0,0,0,0.9)]">
                                 <CertificateTemplate
                                     data={certificateData}
-                                    eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
+                                    eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "AEROSPACE CAD DESIGN CHALLENGE 2026"}
                                 />
                             </div>
                         </div>
@@ -1913,7 +1936,7 @@ function CertificateVault({ soundOn, playSfx }) {
                 >
                     <CertificateTemplate
                         data={certificateData}
-                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "HORIZON CUP: OLYMPIAD & QUIZ 2026"}
+                        eventTitle={certificateData.event || CURRENT_EVENT.certificateTitle || "AEROSPACE CAD DESIGN CHALLENGE 2026"}
                     />
                 </div>
             )}
@@ -1927,7 +1950,7 @@ function RegistrationModal({
     soundOn,
     playSfx,
     isRegistrationClosed = false,
-    eventTitle = "Horizon Cup: Olympiad & Quiz",
+    eventTitle = "CAD Design Challenge",
     whatsappGroup = "https://chat.whatsapp.com/CbY7DzEmWJt5ecekLZX6Di"
 }) {
     const [step, setStep] = useState(1);
